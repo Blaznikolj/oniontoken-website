@@ -1,0 +1,67 @@
+body {
+  margin: 0;
+  font-family: Arial, sans-serif;
+  background: #0a0a0a;
+  color: #e6e6e6;
+  text-align: center;
+}
+
+header {
+  background: #121212;
+  padding: 20px;
+}
+
+.logo {
+  width: 80px;
+  display: block;
+  margin: 0 auto 10px;
+}
+
+nav a {
+  color: #4caf50;
+  text-decoration: none;
+  margin: 0 10px;
+  font-weight: bold;
+}
+
+nav a:hover {
+  text-decoration: underline;
+}
+
+h1, h2 {
+  color: #4caf50;
+}
+
+.tokenomics-card {
+  background: #1c1c1c;
+  border-radius: 8px;
+  display: inline-block;
+  padding: 15px;
+  margin-top: 10px;
+  text-align: left;
+}
+
+ul {
+  list-style: none;
+  padding: 0;
+}
+
+ul li {
+  margin: 8px 0;
+}
+
+ul li a {
+  color: #4caf50;
+  text-decoration: none;
+}
+
+ul li a:hover {
+  text-decoration: underline;
+}
+
+footer {
+  background: #121212;
+  padding: 15px;
+  font-size: 14px;
+  color: #777;
+}
