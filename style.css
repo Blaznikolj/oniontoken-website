@@ -1,87 +1,84 @@
 body {
-  margin: 0;
-  font-family: Arial, sans-serif;
-  background: #0a0a0a;
-  color: #e6e6e6;
-  text-align: center;
+    margin: 0;
+    font-family: 'Arial', sans-serif;
+    background: #0d1117;
+    color: #fff;
+    line-height: 1.6;
+}
+a {
+    text-decoration: none;
 }
 
-header {
-  background: #121212;
-  padding: 20px;
+/* HEADER */
+.header {
+    background: rgba(0, 0, 0, 0.9);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 15px 30px;
+    position: sticky;
+    top: 0;
+}
+.header .logo-text {
+    font-weight: bold;
+    font-size: 1.3em;
+    color: #00ffff;
+}
+.header nav a {
+    color: #fff;
+    margin-left: 20px;
+    font-weight: bold;
+}
+.header nav a:hover {
+    color: #00ffff;
 }
 
-.logo {
-  width: 90px;
-  display: block;
-  margin: 0 auto 10px;
+/* HERO */
+.hero {
+    background: url('background-stars.jpg') center/cover no-repeat;
+    text-align: center;
+    padding: 100px 20px;
+}
+.hero h1 {
+    color: #00ffff;
+    font-size: 3em;
+}
+.hero p {
+    color: #cfd8dc;
+    font-size: 1.2em;
+}
+.buttons .btn {
+    display: inline-block;
+    background: #00ffff;
+    color: #0d1117;
+    padding: 12px 24px;
+    margin: 10px;
+    border-radius: 6px;
+    font-weight: bold;
+}
+.buttons .btn:hover {
+    background: #00cccc;
 }
 
-nav a {
-  color: #4caf50;
-  text-decoration: none;
-  margin: 0 15px;
-  font-weight: bold;
+/* SECTIONS */
+section {
+    padding: 50px 20px;
+    text-align: center;
 }
-
-nav a:hover {
-  text-decoration: underline;
+.tokenomics img {
+    max-width: 300px;
+    margin-bottom: 20px;
 }
-
-h1, h2 {
-  color: #4caf50;
+ul, ol {
+    text-align: left;
+    display: inline-block;
+    max-width: 600px;
 }
-
-.tokenomics-card {
-  background: #1c1c1c;
-  border-radius: 8px;
-  display: inline-block;
-  padding: 15px;
-  margin-top: 10px;
-  text-align: left;
+.footer {
+    background: #000;
+    text-align: center;
+    padding: 20px;
 }
-
-ul {
-  list-style: none;
-  padding: 0;
-}
-
-ul li {
-  margin: 8px 0;
-}
-
-footer {
-  background: #121212;
-  padding: 15px;
-  font-size: 14px;
-  color: #777;
-}
-
-.button-container {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 15px;
-  margin-top: 20px;
-}
-
-.btn {
-  background: #4caf50;
-  color: #fff;
-  padding: 12px 20px;
-  border-radius: 6px;
-  font-weight: bold;
-  text-decoration: none;
-  width: 240px;
-  text-align: center;
-  transition: background 0.3s;
-  font-size: 16px;
-}
-
-.btn i {
-  margin-right: 8px;
-}
-
-.btn:hover {
-  background: #388e3c;
+.footer a {
+    color: #00ffff;
 }
