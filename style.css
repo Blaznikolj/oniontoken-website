@@ -1,5 +1,135 @@
+/* Reset */
+body {
+    margin: 0;
+    padding: 0;
+    font-family: 'Arial', sans-serif;
+    background: #000; /* črno ozadje */
+    color: #fff;
+    line-height: 1.6;
+}
+
+/* Links */
+a {
+    text-decoration: none;
+    color: inherit;
+}
+
+/* HEADER */
+.header {
+    background: rgba(0, 0, 0, 0.95);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 15px 50px;
+    position: sticky;
+    top: 0;
+    z-index: 10;
+}
+.header .logo-text {
+    font-weight: bold;
+    font-size: 1.4em;
+    color: #00ffff;
+}
+.header nav a {
+    color: #fff;
+    margin-left: 20px;
+    font-weight: bold;
+}
+.header nav a:hover {
+    color: #00ffff;
+}
+
+/* HERO */
 .hero {
-    background: #000;
     text-align: center;
     padding: 100px 20px;
+    background: #000;
+}
+.hero h1 {
+    color: #00ffff;
+    font-size: 2.5em;
+    margin-bottom: 10px;
+}
+.hero p {
+    color: #cfd8dc;
+    font-size: 1.2em;
+    margin-bottom: 30px;
+}
+.buttons .btn {
+    display: inline-block;
+    background: #00ffff;
+    color: #0d1117;
+    padding: 12px 24px;
+    margin: 10px;
+    border-radius: 6px;
+    font-weight: bold;
+    transition: background 0.3s;
+}
+.buttons .btn:hover {
+    background: #00cccc;
+}
+
+/* CONTRACT ADDRESS */
+.contract {
+    background: #0d1117;
+    text-align: center;
+    padding: 30px 20px;
+}
+.contract h2 {
+    margin-bottom: 10px;
+    color: #00ffff;
+}
+.contract .address {
+    font-family: monospace;
+    font-size: 1.2em;
+    color: #fff;
+    background: #1a1a1a;
+    display: inline-block;
+    padding: 10px 20px;
+    border-radius: 5px;
+}
+
+/* SECTIONS */
+section {
+    padding: 50px 20px;
+    text-align: center;
+}
+.about p, .getting-started ol, .tokenomics ul, .roadmap ul, .faq p {
+    max-width: 800px;
+    margin: auto;
+    font-size: 1.1em;
+}
+
+/* TOKENOMICS */
+.tokenomics img {
+    max-width: 300px;
+    margin: 20px auto;
+    display: block;
+}
+.tokenomics ul {
+    text-align: left;
+}
+
+/* ROADMAP */
+.roadmap ul {
+    text-align: left;
+}
+
+/* COMMUNITY BUTTONS */
+.community .buttons .btn {
+    min-width: 150px;
+}
+
+/* FOOTER */
+.footer {
+    background: #000;
+    text-align: center;
+    padding: 20px;
+    color: #999;
+}
+.footer a {
+    color: #00ffff;
+}
+.footer a:hover {
+    color: #00cccc;
 }
