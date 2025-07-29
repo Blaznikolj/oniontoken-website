@@ -133,3 +133,11 @@ section {
 .footer a:hover {
     color: #00cccc;
 }
+.why ul {
+    text-align: left;
+    max-width: 800px;
+    margin: auto;
+}
+.why li {
+    margin-bottom: 10px;
+}
