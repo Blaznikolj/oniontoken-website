@@ -1,97 +1,60 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>.ONION Token</title>
-  <link rel="stylesheet" href="style.css">
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
-  <style>
-    .logo svg {
-      width: 90px;
-      height: auto;
-      display: block;
-      margin: 0 auto 10px;
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Onion Token</title>
+<style>
+    body {
+        font-family: Arial, sans-serif;
+        background-color: #0d1117;
+        color: #ffffff;
+        text-align: center;
+        margin: 0;
+        padding: 0;
     }
-  </style>
+    .container {
+        max-width: 800px;
+        margin: auto;
+        padding: 50px 20px;
+    }
+    h1 {
+        color: #00ffff;
+        margin-top: 20px;
+    }
+    p.subtitle {
+        font-size: 1.2em;
+        margin: 15px 0 30px;
+        color: #cfd8dc;
+    }
+    .btn {
+        display: block;
+        width: 80%;
+        max-width: 350px;
+        margin: 10px auto;
+        padding: 14px 20px;
+        background: #00ffff;
+        color: #0d1117;
+        text-decoration: none;
+        border-radius: 6px;
+        font-weight: bold;
+        font-size: 1.1em;
+    }
+    .btn:hover {
+        background: #00cccc;
+    }
+</style>
 </head>
 <body>
-  <header>
-    <div class="logo">
-      <!-- INLINE SVG LOGO -->
-      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 500 500">
-        <!-- *** Tukaj je tvoja SVG koda (zamenjaj s pravo vsebino logotipa) *** -->
-        <path d="M250 10C150 100 150 300 250 490C350 300 350 100 250 10Z" fill="#00ffcc"/>
-        <circle cx="250" cy="250" r="40" fill="#00ffcc"/>
-        <text x="50%" y="95%" text-anchor="middle" font-size="70" fill="#00ffcc">.ONION</text>
-      </svg>
+    <div class="container">
+        <h1>Welcome to Onion Token</h1>
+        <p class="subtitle">Decentralized, anonymous, and community-driven.</p>
+
+        <a class="btn" href="Onion_Token_Whitepaper_Final.pdf" target="_blank">📄 Download PDF Whitepaper</a>
+        <a class="btn" href="Onion_Token_Whitepaper.html" target="_blank">🌐 View HTML Whitepaper</a>
+        <a class="btn" href="https://github.com/Blaznikolj/.-onion-token" target="_blank">💻 GitHub</a>
+        <a class="btn" href="https://x.com/infoonionntoken?s=21" target="_blank">🐦 Twitter/X</a>
+        <a class="btn" href="https://oniontoken.world/" target="_blank">🌍 Official Website</a>
     </div>
-    <h1>.ONION Token</h1>
-    <nav>
-      <a href="#about">About</a>
-      <a href="#tokenomics">Tokenomics</a>
-      <a href="#security">Security</a>
-      <a href="#links">Links</a>
-      <a href="Onion_Token_Whitepaper_Final.pdf" target="_blank">Whitepaper</a>
-    </nav>
-  </header>
-
-  <main>
-    <section id="about">
-      <h2>What is .ONION?</h2>
-      <p>.ONION is a decentralized, community-driven meme token launched on BNB Smart Chain.
-         Built for fairness, transparency and growth, .ONION has zero tax, no presale, and a fair launch —
-         making it truly owned by its community.</p>
-    </section>
-
-    <section id="tokenomics">
-      <h2>Tokenomics</h2>
-      <div class="tokenomics-card">
-        <p><strong>Token Name:</strong> Onion</p>
-        <p><strong>Symbol:</strong> .ONION</p>
-        <p><strong>Chain:</strong> BNB Smart Chain (BEP-20)</p>
-        <p><strong>Total Supply:</strong> 1,000,000,000 .ONION</p>
-        <p><strong>Tax:</strong> 0% (Buy/Sell)</p>
-        <p><strong>Ownership Renounced:</strong> Yes</p>
-        <p><strong>Liquidity Locked:</strong> 100% via UNCX</p>
-      </div>
-    </section>
-
-    <section id="security">
-      <h2>Security & Trust</h2>
-      <ul>
-        <li>Verified Smart Contract</li>
-        <li>Liquidity locked via UNCX</li>
-      </ul>
-    </section>
-
-    <section id="links">
-      <h2>Links</h2>
-      <div class="button-container">
-        <a class="btn" href="https://pancakeswap.finance/swap?outputCurrency=0xf95a185f32aea4ae5e944bbc0f6c72687e607b0a" target="_blank">
-          <i class="fa-solid fa-cake-candles"></i> Buy on PancakeSwap
-        </a>
-        <a class="btn" href="https://app.uniswap.org/" target="_blank">
-          <i class="fa-brands fa-ethereum"></i> Buy on Uniswap
-        </a>
-        <a class="btn" href="https://bscscan.com/token/0xf95a185f32aea4ae5e944bbc0f6c72687e607b0a" target="_blank">
-          <i class="fa-solid fa-magnifying-glass"></i> View on BscScan
-        </a>
-        <a class="btn" href="https://x.com/infoonionntoken?s=21" target="_blank">
-          <i class="fa-brands fa-x-twitter"></i> Twitter (X)
-        </a>
-        <a class="btn" href="https://t.me/OnionTokenProject" target="_blank">
-          <i class="fa-brands fa-telegram"></i> Telegram
-        </a>
-        <a class="btn" href="Onion_Token_Whitepaper_Final.pdf" target="_blank">
-          📄 Whitepaper
-        </a>
-      </div>
-    </section>
-  </main>
-
-  <footer>
-    <p>&copy; 2025 .ONION Token - All rights reserved</p>
-  </footer>
 </body>
 </html>
