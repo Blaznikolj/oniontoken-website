@@ -4,62 +4,94 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Onion Token</title>
-<style>
-    body {
-        margin: 0;
-        padding: 0;
-        font-family: Arial, sans-serif;
-        background-color: #0d1117;
-        color: #ffffff;
-        text-align: center;
-    }
-    .hero {
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        justify-content: center;
-        height: 100vh;
-        background: radial-gradient(circle at center, #0d1117 0%, #050608 100%);
-    }
-    .hero img {
-        max-width: 200px;
-        margin-bottom: 20px;
-    }
-    .hero h1 {
-        color: #00ffff;
-        font-size: 2.5em;
-        margin-bottom: 10px;
-    }
-    .hero p {
-        color: #cfd8dc;
-        font-size: 1.2em;
-        margin-bottom: 30px;
-    }
-    .btn {
-        display: inline-block;
-        background: #00ffff;
-        color: #0d1117;
-        padding: 14px 30px;
-        margin: 10px;
-        border-radius: 6px;
-        font-weight: bold;
-        text-decoration: none;
-        transition: background 0.3s;
-    }
-    .btn:hover {
-        background: #00cccc;
-    }
-</style>
+<link rel="stylesheet" href="style.css">
 </head>
 <body>
+    <!-- HEADER -->
+    <header class="header">
+        <div class="logo-text">ONION TOKEN</div>
+        <nav>
+            <a href="https://t.me/OnionTokenProject" target="_blank">Community</a>
+            <a href="https://x.com/infoonionntoken?s=21" target="_blank">Twitter</a>
+            <a href="https://github.com/Blaznikolj/.-onion-token" target="_blank">GitHub</a>
+            <a href="https://etherscan.io/token/0xf95a185f32aea4ae5e944bbc0f6c72687e607b0a" target="_blank">Contract</a>
+        </nav>
+    </header>
+
+    <!-- HERO -->
     <section class="hero">
-        <img src="onion_logo_token.png" alt="Onion Token Logo">
-        <h1>Welcome to Onion Token</h1>
-        <p>Decentralized, anonymous and community-driven.</p>
-        <div>
-            <a class="btn" href="Onion_Token_Whitepaper_Final.pdf" target="_blank">📄 Download Whitepaper</a>
-            <a class="btn" href="https://x.com/infoonionntoken?s=21" target="_blank">🐦 Join Community</a>
+        <div class="hero-content">
+            <h1>Welcome to Onion Token</h1>
+            <p>Decentralized, anonymous and community-driven cryptocurrency.</p>
+            <div class="buttons">
+                <a href="Onion_Token_Whitepaper_Final.pdf" class="btn" target="_blank">📄 Download Whitepaper</a>
+                <a href="https://t.me/OnionTokenProject" class="btn" target="_blank">💬 Join Community</a>
+                <a href="https://etherscan.io/token/0xf95a185f32aea4ae5e944bbc0f6c72687e607b0a" class="btn" target="_blank">💲 Buy Token</a>
+                <a href="https://app.uniswap.org/#/swap?outputCurrency=0xf95a185f32aea4ae5e944bbc0f6c72687e607b0a" class="btn" target="_blank">🔄 Swap on Uniswap</a>
+                <a href="https://pancakeswap.finance/swap?outputCurrency=0xf95a185f32aea4ae5e944bbc0f6c72687e607b0a" class="btn" target="_blank">🔄 Swap on PancakeSwap</a>
+            </div>
         </div>
     </section>
+
+    <!-- ABOUT -->
+    <section class="about">
+        <h2>What is Onion Token?</h2>
+        <p>Onion Token is a decentralized cryptocurrency project focused on anonymity, security, and community. We aim to create a transparent ecosystem driven by its holders.</p>
+    </section>
+
+    <!-- GETTING STARTED -->
+    <section class="getting-started">
+        <h2>Getting Started</h2>
+        <ol>
+            <li>Choose a crypto wallet (e.g. MetaMask, TrustWallet).</li>
+            <li>Buy Onion Token using Uniswap or PancakeSwap.</li>
+            <li>Hold or stake your tokens to support the network.</li>
+        </ol>
+    </section>
+
+    <!-- TOKENOMICS -->
+    <section class="tokenomics">
+        <h2>Tokenomics</h2>
+        <img src="tokenomics.png" alt="Tokenomics Diagram">
+        <ul>
+            <li><strong>50%</strong> Community Distribution</li>
+            <li><strong>30%</strong> Development</li>
+            <li><strong>10%</strong> Marketing</li>
+            <li><strong>10%</strong> Liquidity Reserves</li>
+        </ul>
+    </section>
+
+    <!-- ROADMAP -->
+    <section class="roadmap">
+        <h2>Roadmap</h2>
+        <ul>
+            <li><strong>Q3 2025:</strong> Fair launch, DEX listings, first DeFi partners.</li>
+            <li><strong>Q4 2025:</strong> Staking platform, first NFT drops, expand marketing.</li>
+            <li><strong>Q1 2026:</strong> CEX listings, more DeFi integrations, advanced privacy features.</li>
+        </ul>
+    </section>
+
+    <!-- COMMUNITY -->
+    <section class="community">
+        <h2>Join the Community</h2>
+        <div class="buttons">
+            <a href="https://t.me/OnionTokenProject" class="btn" target="_blank">Telegram</a>
+            <a href="https://x.com/infoonionntoken?s=21" class="btn" target="_blank">Twitter/X</a>
+            <a href="https://github.com/Blaznikolj/.-onion-token" class="btn" target="_blank">GitHub</a>
+        </div>
+    </section>
+
+    <!-- FAQ -->
+    <section class="faq">
+        <h2>FAQ</h2>
+        <p><strong>What is the total supply?</strong> 1,000,000,000 $ONION.</p>
+        <p><strong>Is there any tax?</strong> 0% (Fair Launch).</p>
+        <p><strong>How can I buy Onion Token?</strong> On Uniswap or PancakeSwap using the contract address.</p>
+    </section>
+
+    <!-- FOOTER -->
+    <footer class="footer">
+        <p>© 2025 Onion Token | <a href="Onion_Token_Whitepaper_Final.pdf" target="_blank">Whitepaper</a></p>
+    </footer>
 </body>
 </html>
