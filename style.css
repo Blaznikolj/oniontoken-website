@@ -29,6 +29,15 @@ a {
     font-weight: bold;
     font-size: 1.4em;
     color: #00ffff;
+
+    display: flex;
+    align-items: center;
+    gap: 10px; /* razmik med logom in besedilom */
+}
+
+.site-logo {
+    height: 40px; /* prilagodi velikost loga po želji */
+}
 }
 .header nav a {
     color: #fff;
