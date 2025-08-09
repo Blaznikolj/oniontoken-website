@@ -1,1 +1,12 @@
 
+<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 32 32">
+  <!-- za rahlo zaobljene robove (neobvezno) -->
+  <defs><clipPath id="sq"><rect x="0" y="0" width="32" height="32" rx="6" ry="6"/></clipPath></defs>
+
+  <!-- NALOŽI PNG in odreži na KVADRAT, s poudarkom na LEVI (xMin) kjer je simbol čebule -->
+  <image
+    href="https://raw.githubusercontent.com/Blaznikolj/oniontoken-website/main/images/Onion_Token_Logo_256x256.png"
+    x="0" y="0" width="32" height="32"
+    preserveAspectRatio="xMinYMid slice"
+    clip-path="url(#sq)"/>
+</svg>
