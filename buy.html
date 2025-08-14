@@ -97,7 +97,6 @@
     const $ = (id)=>document.getElementById(id);
     const ok  = (t)=>{ $("status").style.display="block"; $("status").textContent=t; $("error").style.display="none"; };
     const err = (t)=>{ $("error").style.display="block"; $("error").textContent=t; $("status").style.display="none"; };
-    const toWei=(amt,dec)=> BigInt(Math.floor(Number(amt)(10*dec)));
     const fmt = (n,d=6)=>Number(n).toLocaleString(undefined,{maximumFractionDigits:d});
 
     let provider, signer, account, router, usdt;
@@ -133,6 +132,8 @@
       }catch(e){ err(e.message||String(e)); }
     }
 
+    function parseUnits(amount, decimals){ return ethers.parseUnits(String(amount), decimals); }
+
     async function getQuote(){
       try{
         await ensureChain();
@@ -153,7 +154,7 @@
           const s = await (new ethers.BrowserProvider(window.ethereum)).getSigner();
           const d = await (new ethers.Contract(USDT, ["function decimals() view returns (uint8)"], s)).decimals();
           path=[USDT, WBNB, TOKEN];
-          amountIn=toWei(amt, d);
+          amountIn=parseUnits(amt, d);
           sym="USDT";
         }
 
@@ -194,7 +195,10 @@
 
     async function addTok(){
       try{
-        await window.ethereum.request({method:"wallet_watchAsset", params:{type:"ERC20", options:{address:TOKEN, symbol:".Onion", decimals:18}}});
+        await window.ethereum.request({
+          method:"wallet_watchAsset",
+          params:{type:"ERC20", options:{address:TOKEN, symbol:".Onion", decimals:18}}
+        });
       }catch(e){ err(e.message||String(e)); }
     }
 
@@ -231,8 +235,8 @@
     }
     function applyLang(lang){
       document.body.setAttribute("data-lang", lang);
-      $("tTitle").textContent = t("title");
-      $("tSub").textContent   = t("sub");
+      $("tTitle").textContent   = t("title");
+      $("tSub").textContent     = t("sub");
       $("tNetwork").textContent = t("network");
       $("tWallet").textContent  = t("wallet");
       $("tPayWith").textContent = t("paywith");
@@ -245,11 +249,7 @@
 
     // Events
     window.addEventListener("DOMContentLoaded", ()=>{
-      // Build static texts (so niso prazni)
-      document.getElementById("tTitle"); document.getElementById("tSub");
-      document.getElementById("tNetwork"); document.getElementById("tWallet");
-      document.getElementById("tPayWith"); document.getElementById("tAmount");
-      applyLang("en");
+      applyLang("en");                                  // privzeto EN
       $("bEN").addEventListener("click", ()=>applyLang("en"));
       $("bSI").addEventListener("click", ()=>applyLang("si"));
       $("connect").addEventListener("click", connect);
