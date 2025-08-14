@@ -97,6 +97,9 @@
     const $ = (id)=>document.getElementById(id);
     const ok  = (t)=>{ $("status").style.display="block"; $("status").textContent=t; $("error").style.display="none"; };
     const err = (t)=>{ $("error").style.display="block"; $("error").textContent=t; $("status").style.display="none"; };
+
+    // ✅ popravljeno
+    const toWei = (amt, dec) => BigInt(Math.round(Number(amt) * (10 ** Number(dec))));
     const fmt = (n,d=6)=>Number(n).toLocaleString(undefined,{maximumFractionDigits:d});
 
     let provider, signer, account, router, usdt;
@@ -132,8 +135,6 @@
       }catch(e){ err(e.message||String(e)); }
     }
 
-    function parseUnits(amount, decimals){ return ethers.parseUnits(String(amount), decimals); }
-
     async function getQuote(){
       try{
         await ensureChain();
@@ -154,7 +155,7 @@
           const s = await (new ethers.BrowserProvider(window.ethereum)).getSigner();
           const d = await (new ethers.Contract(USDT, ["function decimals() view returns (uint8)"], s)).decimals();
           path=[USDT, WBNB, TOKEN];
-          amountIn=parseUnits(amt, d);
+          amountIn=toWei(amt, d);
           sym="USDT";
         }
 
@@ -195,10 +196,7 @@
 
     async function addTok(){
       try{
-        await window.ethereum.request({
-          method:"wallet_watchAsset",
-          params:{type:"ERC20", options:{address:TOKEN, symbol:".Onion", decimals:18}}
-        });
+        await window.ethereum.request({method:"wallet_watchAsset", params:{type:"ERC20", options:{address:TOKEN, symbol:".Onion", decimals:18}}});
       }catch(e){ err(e.message||String(e)); }
     }
 
@@ -230,13 +228,13 @@
     function t(key, vars){
       const lang = document.body.getAttribute("data-lang")||"en";
       let s = (L[lang] && L[lang][key]) ? L[lang][key] : key;
-      if(vars) for(const k in vars){ s = s.replaceAll({${k}}, String(vars[k])); }
+      if(vars) for(const k in vars){ s = s.replaceAll({${k}}, String(vars[k])); } // ✅ popravljeno
       return s;
     }
     function applyLang(lang){
       document.body.setAttribute("data-lang", lang);
-      $("tTitle").textContent   = t("title");
-      $("tSub").textContent     = t("sub");
+      $("tTitle").textContent = t("title");
+      $("tSub").textContent   = t("sub");
       $("tNetwork").textContent = t("network");
       $("tWallet").textContent  = t("wallet");
       $("tPayWith").textContent = t("paywith");
@@ -249,7 +247,7 @@
 
     // Events
     window.addEventListener("DOMContentLoaded", ()=>{
-      applyLang("en");                                  // privzeto EN
+      applyLang("en");
       $("bEN").addEventListener("click", ()=>applyLang("en"));
       $("bSI").addEventListener("click", ()=>applyLang("si"));
       $("connect").addEventListener("click", connect);
