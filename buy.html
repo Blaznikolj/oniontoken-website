@@ -76,12 +76,12 @@
   <script src="https://cdn.jsdelivr.net/npm/ethers@6.13.1/dist/ethers.umd.min.js"></script>
   <script>
   (function(){
-    // ---- Constants
+    // Addresses (BSC)
     const TOKEN  = "0xf95a185f32aea4ae5e944bbc0f6c72687e607b0a";
     const WBNB   = "0xbb4cdb9cbd36b01bd1cbaebf2de08d9173bc095c";
     const USDT   = "0x55d398326f99059ff775485246999027b3197955";
     const ROUTER = "0x10ed43c718714eb63d5aa57b78b54704e256024e";
-    const CHAIN  = "0x38";
+    const CHAIN  = "0x38"; // BSC
 
     const routerAbi = [
       "function getAmountsOut(uint256 amountIn, address[] calldata path) external view returns (uint256[] memory)",
@@ -94,16 +94,14 @@
       "function approve(address spender, uint256 amount) external returns (bool)"
     ];
 
-    // ---- Helpers
     const $ = (id)=>document.getElementById(id);
     const ok  = (t)=>{ $("status").style.display="block"; $("status").textContent=t; $("error").style.display="none"; };
     const err = (t)=>{ $("error").style.display="block"; $("error").textContent=t; $("status").style.display="none"; };
-    const fmt = (n,d=6)=>Number(n).toLocaleString(undefined,{maximumFractionDigits:d});
     const toWei=(amt,dec)=> BigInt(Math.floor(Number(amt)(10*dec)));
+    const fmt = (n,d=6)=>Number(n).toLocaleString(undefined,{maximumFractionDigits:d});
 
     let provider, signer, account, router, usdt;
 
-    // ---- Chain & connect
     async function ensureChain(){
       if(!window.ethereum) throw new Error("MetaMask not detected.");
       const id = await window.ethereum.request({method:"eth_chainId"});
@@ -135,7 +133,6 @@
       }catch(e){ err(e.message||String(e)); }
     }
 
-    // ---- Quote & buy
     async function getQuote(){
       try{
         await ensureChain();
@@ -178,19 +175,19 @@
         const deadline = Math.floor(Date.now()/1000)+15*60;
 
         if(pay==="BNB"){
-          const tx = await router
-            .swapExactETHForTokensSupportingFeeOnTransferTokens(minOut, path, account, deadline, {value:amountIn});
+          const tx = await router.swapExactETHForTokensSupportingFeeOnTransferTokens(
+            minOut, path, account, deadline, {value:amountIn}
+          );
           ok(t("ok_buying"));
-          const rc=await tx.wait();
-          ok(t("ok_tx",{hash:rc.hash}));
+          const rc=await tx.wait(); ok(t("ok_tx",{hash:rc.hash}));
         }else{
           const allowance = await usdt.allowance(account, ROUTER);
           if(allowance < amountIn){ ok(t("ok_approve")); const a=await usdt.approve(ROUTER, amountIn); await a.wait(); }
-          const tx = await router
-            .swapExactTokensForTokensSupportingFeeOnTransferTokens(amountIn, minOut, path, account, deadline);
+          const tx = await router.swapExactTokensForTokensSupportingFeeOnTransferTokens(
+            amountIn, minOut, path, account, deadline
+          );
           ok(t("ok_buying"));
-          const rc=await tx.wait();
-          ok(t("ok_tx",{hash:rc.hash}));
+          const rc=await tx.wait(); ok(t("ok_tx",{hash:rc.hash}));
         }
       }catch(e){ err(e.message||String(e)); }
     }
@@ -201,7 +198,7 @@
       }catch(e){ err(e.message||String(e)); }
     }
 
-    // ---- i18n
+    // i18n
     const L = {
       en:{title:"Buy .Onion",
           sub:"PCS V2 Router • BNB or USDT (multi‑hop USDT→WBNB→.Onion) • addresses in lowercase.",
@@ -246,8 +243,12 @@
       $("bSI").classList.toggle("active", lang==="si");
     }
 
-    // ---- Events
+    // Events
     window.addEventListener("DOMContentLoaded", ()=>{
+      // Build static texts (so niso prazni)
+      document.getElementById("tTitle"); document.getElementById("tSub");
+      document.getElementById("tNetwork"); document.getElementById("tWallet");
+      document.getElementById("tPayWith"); document.getElementById("tAmount");
       applyLang("en");
       $("bEN").addEventListener("click", ()=>applyLang("en"));
       $("bSI").addEventListener("click", ()=>applyLang("si"));
