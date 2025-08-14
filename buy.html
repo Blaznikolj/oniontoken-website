@@ -1,0 +1,228 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Buy .Onion</title>
+  <style>
+    html,body{margin:0;background:#0b0f17;color:#e6e8ec;font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif}
+    .wrap{max-width:720px;margin:40px auto;padding:24px;background:#111827;border:1px solid #1f2937;border-radius:16px}
+    .card{background:#0f1624;border:1px solid #1f2937;border-radius:12px;padding:16px;margin:16px 0}
+    .row{display:flex;gap:12px;align-items:center}
+    .row>*{flex:1}
+    label{display:block;font-size:14px;color:#9aa4b2;margin-bottom:8px}
+    select,input{width:100%;padding:12px 14px;border-radius:10px;border:1px solid #263248;background:#0b1220;color:#e6e8ec;font-size:16px}
+    button{cursor:pointer;padding:12px 16px;border:0;border-radius:10px;font-weight:700}
+    .primary{background:#27c193;color:#08131a}
+    .secondary{background:#1f2937;color:#e6e8ec}
+    .muted{color:#9aa4b2;font-size:13px}
+    .ok{color:#27c193;white-space:pre-line;font-size:13px;display:none}
+    .err{color:#ff6b6b;white-space:pre-line;font-size:13px;display:none}
+    .lang{position:fixed;right:16px;top:16px;display:flex;gap:8px;z-index:10}
+    .lang button{background:#1f2937;color:#e6e8ec;border:0;border-radius:8px;padding:6px 10px;font-weight:700}
+    .lang button.active{background:#27c193;color:#08131a}
+  </style>
+</head>
+<body>
+  <div class="lang">
+    <button id="bEN" class="active">GB EN</button>
+    <button id="bSI">SI SI</button>
+  </div>
+
+  <div class="wrap">
+    <h1 id="tTitle">Buy .Onion</h1>
+    <p class="muted" id="tSub">PCS V2 Router • BNB or USDT (multi‑hop USDT→WBNB→.Onion) • addresses in lowercase.</p>
+
+    <div class="card">
+      <div><span id="tNetwork">Network</span>: <b id="net">—</b> • <span id="tWallet">Wallet</span>: <b id="acct">—</b></div>
+      <div class="row" style="margin-top:12px">
+        <button id="connect" class="primary">Connect wallet</button>
+        <button id="addTok" class="secondary">Add .Onion to wallet</button>
+      </div>
+      <div id="status" class="ok"></div>
+      <div id="error" class="err"></div>
+    </div>
+
+    <div class="card">
+      <div class="row">
+        <div>
+          <label id="tPayWith">Pay with</label>
+          <select id="pay"><option>BNB</option><option>USDT</option></select>
+        </div>
+        <div>
+          <label>Slippage (%)</label>
+          <input id="slip" type="number" min="0.1" step="0.1" value="1.0" />
+        </div>
+      </div>
+
+      <div class="row" style="margin-top:12px">
+        <div>
+          <label id="tAmount">Amount</label>
+          <input id="amt" type="number" step="0.0001" placeholder="e.g. 0.02 (BNB) or 10 (USDT)" />
+        </div>
+        <div>
+          <label>&nbsp;</label>
+          <div class="row">
+            <button id="quote" class="secondary">Quote</button>
+            <button id="buy" class="primary">Buy</button>
+          </div>
+        </div>
+      </div>
+      <div id="q" class="muted" style="margin-top:10px">—</div>
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/ethers@6.13.1/dist/ethers.umd.min.js"></script>
+  <script>
+  (function(){
+    const TOKEN  = "0xf95a185f32aea4ae5e944bbc0f6c72687e607b0a";
+    const WBNB   = "0xbb4cdb9cbd36b01bd1cbaebf2de08d9173bc095c";
+    const USDT   = "0x55d398326f99059ff775485246999027b3197955";
+    const ROUTER = "0x10ed43c718714eb63d5aa57b78b54704e256024e";
+    const CHAIN  = "0x38";
+
+    const routerAbi = [
+      "function getAmountsOut(uint256 amountIn, address[] calldata path) external view returns (uint256[] memory)",
+      "function swapExactETHForTokensSupportingFeeOnTransferTokens(uint amountOutMin, address[] calldata path, address to, uint deadline) external payable",
+      "function swapExactTokensForTokensSupportingFeeOnTransferTokens(uint amountIn, uint amountOutMin, address[] calldata path, address to, uint deadline) external"
+    ];
+    const erc20Abi = [
+      "function decimals() view returns (uint8)",
+      "function allowance(address owner, address spender) view returns (uint256)",
+      "function approve(address spender, uint256 amount) external returns (bool)"
+    ];
+
+    const $ = (id)=>document.getElementById(id);
+    const showOk  = (t)=>{ $("status").style.display="block"; $("status").textContent=t; $("error").style.display="none"; };
+    const showErr = (t)=>{ $("error").style.display="block"; $("error").textContent=t; $("status").style.display="none"; };
+    const fmt = (n, d=6)=>Number(n).toLocaleString(undefined,{maximumFractionDigits:d});
+
+    let provider, signer, account, router, usdt;
+
+    async function ensureChain(){
+      if(!window.ethereum) throw new Error("MetaMask not detected.");
+      const id = await window.ethereum.request({method:"eth_chainId"});
+      if(id !== CHAIN){
+        try{
+          await window.ethereum.request({method:"wallet_switchEthereumChain", params:[{chainId:CHAIN}]});
+        }catch(e){
+          await window.ethereum.request({method:"wallet_addEthereumChain", params:[{
+            chainId:CHAIN, chainName:"BSC",
+            nativeCurrency:{name:"BNB",symbol:"BNB",decimals:18},
+            rpcUrls:["https://bsc-dataseed.binance.org/"], blockExplorerUrls:["https://bscscan.com/"]
+          }]});
+          await window.ethereum.request({method:"wallet_switchEthereumChain", params:[{chainId:CHAIN}]});
+        }
+      }
+    }
+
+    async function connect(){
+      try{
+        await ensureChain();
+        provider = new ethers.BrowserProvider(window.ethereum);
+        await provider.send("eth_requestAccounts", []); // show MetaMask prompt
+        signer   = await provider.getSigner();
+        account  = await signer.getAddress();
+        router   = new ethers.Contract(ROUTER, routerAbi, signer);
+        usdt     = new ethers.Contract(USDT, erc20Abi, signer);
+        $("net").textContent = "BSC (56)";
+        $("acct").textContent = account.slice(0,6)+"…"+account.slice(-4);
+        showOk(t("ok_connected"));
+      }catch(e){ showErr(e.message||String(e)); }
+    }
+
+    function toWei(amount,dec){ return BigInt(Math.floor(Number(amount)(10*dec))); }
+
+    async function getQuote(){
+      try{
+        await ensureChain();
+        if(!router) router = new ethers.Contract(ROUTER, routerAbi, (await (new ethers.BrowserProvider(window.ethereum)).getSigner()));
+        const pay = $("pay").value;
+        const amt = parseFloat($("amt").value);
+        if(!amt || amt<=0) throw new Error(t("err_amount"));
+        let path, amountIn, sym;
+        if(pay==="BNB"){
+          path=[WBNB,TOKEN];
+          amountIn=ethers.parseEther(String(amt));
+          sym="BNB";
+        }else{
+          const signer = await (new ethers.BrowserProvider(window.ethereum)).getSigner();
+          const usdtD = await (new ethers.Contract(USDT, ["function decimals() view returns (uint8)"], signer)).decimals();
+          path=[USDT,WBNB,TOKEN];
+          amountIn=toWei(amt, usdtD);
+          sym="USDT";
+        }
+        let amounts;
+        try{ amounts = await router.getAmountsOut(amountIn, path); }
+        catch{ throw new Error(t("err_quote")); }
+        const out = amounts[amounts.length-1];
+        const sl = Math.max(0.1, parseFloat($("slip").value||"1"));
+        const minOut = out - (out * BigInt(Math.floor(sl*1000)) / 100000n);
+        $("q").innerHTML = t("quote_line", {amt, sym, out:Number(out)/1e18, min:Number(minOut)/1e18, sl});
+        return {pay, amountIn, minOut, path};
+      }catch(e){ showErr(e.message||String(e)); throw e; }
+    }
+
+    async function buy(){
+      try{
+        const {pay, amountIn, minOut, path} = await getQuote();
+        const deadline = Math.floor(Date.now()/1000)+15*60;
+        if(pay==="BNB"){
+          const tx = await router.swapExactETHForTokensSupportingFeeOnTransferTokens(minOut, path, account, deadline, {value:amountIn});
+          showOk(t("ok_buying")); const rc=await tx.wait(); showOk(t("ok_tx", {hash:rc.hash}));
+        }else{
+          const allowance = await usdt.allowance(account, ROUTER);
+          if(allowance < amountIn){ showOk(t("ok_approve")); const txx=await usdt.approve(ROUTER, amountIn); await txx.wait(); }
+          const tx = await router.swapExactTokensForTokensSupportingFeeOnTransferTokens(amountIn, minOut, path, account, deadline);
+          showOk(t("ok_buying")); const rc=await tx.wait(); showOk(t("ok_tx", {hash:rc.hash}));
+        }
+      }catch(e){ showErr(e.message||String(e)); }
+    }
+
+    async function addTok(){
+      try{
+        await window.ethereum.request({method:"wallet_watchAsset", params:{type:"ERC20", options:{address:TOKEN, symbol:".Onion", decimals:18}}});
+      }catch(e){ showErr(e.message||String(e)); }
+    }
+
+    // i18n
+    const L = {
+      en: {
+        title:"Buy .Onion",
+        sub:"PCS V2 Router • BNB or USDT (multi‑hop USDT→WBNB→.Onion) • addresses in lowercase.",
+        network:"Network", wallet:"Wallet",
+        paywith:"Pay with", amount:"Amount",
+        btn_quote:"Quote", btn_buy:"Buy",
+        ok_connected:"Wallet connected.",
+        err_amount:"Enter an amount.",
+        err_quote:"Quote failed (no path on PCS V2 or empty reserves).",
+        ok_buying:"Processing purchase…",
+        ok_tx:"Success! Tx: https://bscscan.com/tx/{hash}",
+        ok_approve:"Approving USDT…",
+        quote_line:"Pay: <b>{amt}</b> {sym}<br>Receive ~ <b>{out}</b> .Onion<br>MinOut ({sl}%): <b>{min}</b>"
+      },
+      si: {
+        title:"Kupi .Onion",
+        sub:"PCS V2 Router • BNB ali USDT (multi‑hop USDT→WBNB→.Onion) • naslovi v lowercase.",
+        network:"Omrežje", wallet:"Denarnica",
+        paywith:"Plačilo z", amount:"Znesek",
+        btn_quote:"Kotacija", btn_buy:"Kupi",
+        ok_connected:"Denarnica povezana.",
+        err_amount:"Vnesi znesek.",
+        err_quote:"Kotacija ni uspela (ni poti na PCS V2 ali prazne rezerve).",
+        ok_buying:"Nakup v teku …",
+        ok_tx:"Uspeh! Tx: https://bscscan.com/tx/{hash}",
+        ok_approve:"Odobritev USDT…",
+        quote_line:"Plačilo: <b>{amt}</b> {sym}<br>Prejmeš približno: <b>{out}</b> .Onion<br>MinOut ({sl}%): <b>{min}</b>"
+      }
+    };
+    function t(key, vars){
+      const lang = document.body.getAttribute("data-lang")||"en";
+      let s = L[lang][key]||key;
+      if(vars) for(const k in vars) s = s.replaceAll({${k}}, String(vars[k]));
+      return s;
+    }
+    function applyLang(lang){
+      document.body.setAttribute("data-lang", lang);
+      $("tTitle").textContent    = t("title");
+      $("
