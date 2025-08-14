@@ -5,122 +5,291 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Onion Token</title>
 <link rel="stylesheet" href="style.css">
+
+<!-- Sticky Buy button + language switch styles -->
+<style>
+  .buy-fab {
+    position: fixed;
+    right: 16px;
+    bottom: 16px;
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 16px;
+    background: #27c193;
+    color: #08131a;
+    text-decoration: none;
+    border-radius: 999px;
+    font-weight: 700;
+    font-size: 15px;
+    box-shadow: 0 8px 24px rgba(39, 193, 147, 0.35);
+    z-index: 9999;
+    transition: transform .12s ease, box-shadow .12s ease, background .12s ease;
+  }
+  .buy-fab:hover { transform: translateY(-1px); box-shadow: 0 10px 28px rgba(39,193,147,.45); background:#22b184; }
+  .buy-fab img { height: 24px; width: 24px; display: block; }
+  .buy-fab .label { white-space: nowrap; }
+
+  .lang-switch {
+    position: fixed;
+    right: 16px;
+    top: 16px;
+    z-index: 10000;
+    display: inline-flex;
+    gap: 6px;
+  }
+  .lang-switch button {
+    background: #1f2937;
+    color: #e6e8ec;
+    border: 0;
+    border-radius: 8px;
+    padding: 6px 10px;
+    font-weight: 600; cursor: pointer;
+  }
+  .lang-switch button.active { background:#27c193; color:#08131a; }
+  @supports (padding: max(0px)) {
+    .buy-fab { right: max(16px, env(safe-area-inset-right)); bottom: max(16px, env(safe-area-inset-bottom)); }
+    .lang-switch { right: max(16px, env(safe-area-inset-right)); top: max(16px, env(safe-area-inset-top)); }
+  }
+</style>
 </head>
 <body>
+    <!-- LANGUAGE SWITCH -->
+    <div class="lang-switch">
+      <button id="lang-en" class="active">🇬🇧 EN</button>
+      <button id="lang-si">🇸🇮 SI</button>
+    </div>
+
     <!-- HEADER -->
     <header class="header">
-</div>
-        <nav>
-            <a href="https://t.me/OnionTokenProject" target="_blank">Community</a>
-            <a href="https://x.com/infoonionntoken?s=21" target="_blank">Twitter</a>
-            <a href="https://github.com/Blaznikolj/.-onion-token" target="_blank">GitHub</a>
-            <a href="https://bscscan.com/token/0xf95a185f32aea4ae5e944bbc0f6c72687e607b0a" target="_blank">Contract</a>
-        </nav>
+      <nav>
+        <a id="navCommunity" href="https://t.me/OnionTokenProject" target="_blank">Community</a>
+        <a id="navTwitter" href="https://x.com/infoonionntoken?s=21" target="_blank">Twitter</a>
+        <a id="navGitHub" href="https://github.com/Blaznikolj/.-onion-token" target="_blank">GitHub</a>
+        <a id="navContract" href="https://bscscan.com/token/0xf95a185f32aea4ae5e944bbc0f6c72687e607b0a" target="_blank">Contract</a>
+      </nav>
     </header>
 
     <!-- HERO -->
     <section class="hero">
-        <div class="hero-content">
-            <img src="images/Onion_Token_Logo_256x256.png" 
-     alt="Onion Token Logo" 
-     style="display:block; margin: 0 auto; width: 300px; height: auto;">
-            
-            <h1>Welcome to Onion Token</h1>
-            <p>Decentralized, anonymous and community-driven cryptocurrency.</p>
-            <div class="buttons">
-                
-                <a href="https://t.me/OnionTokenProject" class="btn" target="_blank">💬 Join Community</a>
-                <a href="https://pancakeswap.finance/swap?outputCurrency=0xf95a185f32aea4ae5e944bbc0f6c72687e607b0a" class="btn" target="_blank">💲 Buy on PancakeSwap</a>
-                <a href="https://bscscan.com/token/0xf95a185f32aea4ae5e944bbc0f6c72687e607b0a" class="btn" target="_blank">📜 View on BscScan</a>
-                <a href="https://www.pinksale.finance/pinklock/bsc/record/1343005" class="btn" target="_blank">🔒 View Token Lock</a>
-<a href="https://dexscreener.com/bsc/0x37278d454b49fc7286daa89fd1ba3acd52b797e3" 
-   class="btn" target="_blank">
-    📈 View on DexScreener (PancakeSwap)
-
-
-            </div>
+      <div class="hero-content">
+        <img src="images/Onion_Token_Logo_256x256.png" alt="Onion Token Logo" style="display:block; margin: 0 auto; width: 300px; height: auto;">
+        <h1 id="heroTitle">Welcome to Onion Token</h1>
+        <p id="heroSubtitle">Decentralized, anonymous and community-driven cryptocurrency.</p>
+        <div class="buttons">
+          <a id="btnJoin" href="https://t.me/OnionTokenProject" class="btn" target="_blank">💬 Join Community</a>
+          <a id="btnPCS" href="https://pancakeswap.finance/swap?outputCurrency=0xf95a185f32aea4ae5e944bbc0f6c72687e607b0a" class="btn" target="_blank">💲 Buy on PancakeSwap</a>
+          <a id="btnBscScan" href="https://bscscan.com/token/0xf95a185f32aea4ae5e944bbc0f6c72687e607b0a" class="btn" target="_blank">📜 View on BscScan</a>
+          <a id="btnLock" href="https://www.pinksale.finance/pinklock/bsc/record/1343005" class="btn" target="_blank">🔒 View Token Lock</a>
+          <a id="btnDex" href="https://dexscreener.com/bsc/0x37278d454b49fc7286daa89fd1ba3acd52b797e3" class="btn" target="_blank">📈 View on DexScreener (PancakeSwap)</a>
         </div>
+      </div>
     </section>
 
     <!-- CONTRACT ADDRESS -->
     <section class="contract">
-        <h2>Smart Contract Address (BSC)</h2>
-        <p class="address">0xf95a185f32aea4ae5e944bbc0f6c72687e607b0a</p>
+      <h2 id="contractHeader">Smart Contract Address (BSC)</h2>
+      <p class="address">0xf95a185f32aea4ae5e944bbc0f6c72687e607b0a</p>
     </section>
 
     <!-- ABOUT -->
     <section class="about">
-    <h2>What is Onion Token?</h2>
-    <p>Onion Token is a decentralized cryptocurrency built on the Binance Smart Chain (BSC). 
-    Our mission is to create a secure, anonymous, and community-driven ecosystem where users 
-    have full control over their finances.</p>
+      <h2 id="aboutHeader">What is Onion Token?</h2>
+      <p id="aboutP1">Onion Token is a decentralized cryptocurrency built on the Binance Smart Chain (BSC). Our mission is to create a secure, anonymous, and community-driven ecosystem where users have full control over their finances.</p>
 
-    <section class="why">
-    <h2>Why Choose Onion Token?</h2>
-    <ul>
-        <li><strong>Privacy first:</strong> Advanced security and anonymity features.</li>
-        <li><strong>Community-owned:</strong> Fully decentralized with no taxes or private sales.</li>
-        <li><strong>Utility:</strong> Staking, DeFi integrations, and upcoming dApps.</li>
-        <li><strong>Strong roadmap:</strong> Clear development goals and milestones.</li>
-    </ul>
-</section>   
+      <section class="why">
+        <h2 id="whyHeader">Why Choose Onion Token?</h2>
+        <ul>
+          <li id="whyL1"><strong>Privacy first:</strong> Advanced security and anonymity features.</li>
+          <li id="whyL2"><strong>Community-owned:</strong> Fully decentralized with no taxes or private sales.</li>
+          <li id="whyL3"><strong>Utility:</strong> Staking, DeFi integrations, and upcoming dApps.</li>
+          <li id="whyL4"><strong>Strong roadmap:</strong> Clear development goals and milestones.</li>
+        </ul>
+      </section>
 
-    <p>The project was launched as a fair launch with <strong>0% taxes</strong> and a 
-    total supply of <strong>1,000,000,000 $ONION</strong>. The token is fully owned by 
-    the community – there are no private sales or hidden developer allocations.</p>
+      <p id="launchP">The project was launched as a fair launch with <strong>0% taxes</strong> and a total supply of <strong>1,000,000,000 $ONION</strong>. The token is fully owned by the community – there are no private sales or hidden developer allocations.</p>
 
-    <p>Onion Token is focused on developing privacy tools, staking opportunities, and 
-    decentralized applications (dApps) that reward loyal holders and increase real utility.</p>
-</section>
+      <p id="focusP">Onion Token is focused on developing privacy tools, staking opportunities, and decentralized applications (dApps) that reward loyal holders and increase real utility.</p>
+    </section>
 
     <!-- GETTING STARTED -->
     <section class="getting-started">
-        <h2>Getting Started</h2>
-        <ol>
-    <li><strong>Choose a crypto wallet:</strong> Install MetaMask, TrustWallet, or any BSC-compatible wallet.</li>
-    <li><strong>Buy Onion Token:</strong> Purchase on PancakeSwap using the contract address.</li>
-    <li><strong>Hold or stake:</strong> Earn rewards and support the network by holding or staking your tokens.</li>
-</ol>
+      <h2 id="gettingHeader">Getting Started</h2>
+      <ol>
+        <li id="gs1"><strong>Choose a crypto wallet:</strong> Install MetaMask, TrustWallet, or any BSC-compatible wallet.</li>
+        <li id="gs2"><strong>Buy Onion Token:</strong> Purchase on PancakeSwap using the contract address.</li>
+        <li id="gs3"><strong>Hold or stake:</strong> Earn rewards and support the network by holding or staking your tokens.</li>
+      </ol>
     </section>
 
     <!-- TOKENOMICS -->
     <section class="tokenomics">
-        <h2>Tokenomics</h2>
-        <img src="tokenomics.png" alt="Tokenomics Diagram">
-        
+      <h2 id="tokenomicsHeader">Tokenomics</h2>
+      <img src="tokenomics.png" alt="Tokenomics Diagram">
     </section>
 
     <!-- ROADMAP -->
     <section class="roadmap">
-        <h2>Roadmap</h2>
-        <ul>
-            <li><strong>Q3 2025:</strong> Fair launch, DEX listings, first DeFi partners.</li>
-            <li><strong>Q4 2025:</strong> Staking platform, first NFT drops, expand marketing.</li>
-            <li><strong>Q1 2026:</strong> CEX listings, more DeFi integrations, advanced privacy features.</li>
-        </ul>
+      <h2 id="roadmapHeader">Roadmap</h2>
+      <ul>
+        <li id="r1"><strong>Q3 2025:</strong> Fair launch, DEX listings, first DeFi partners.</li>
+        <li id="r2"><strong>Q4 2025:</strong> Staking platform, first NFT drops, expand marketing.</li>
+        <li id="r3"><strong>Q1 2026:</strong> CEX listings, more DeFi integrations, advanced privacy features.</li>
+      </ul>
     </section>
 
     <!-- COMMUNITY -->
     <section class="community">
-        <h2>Join the Community</h2>
-        <div class="buttons">
-            <a href="https://t.me/OnionTokenProject" class="btn" target="_blank">Telegram</a>
-            <a href="https://x.com/infoonionntoken?s=21" class="btn" target="_blank">Twitter/X</a>
-            <a href="https://github.com/Blaznikolj/.-onion-token" class="btn" target="_blank">GitHub</a>
-        </div>
+      <h2 id="communityHeader">Join the Community</h2>
+      <div class="buttons">
+        <a id="btnTelegram2" href="https://t.me/OnionTokenProject" class="btn" target="_blank">Telegram</a>
+        <a id="btnTwitter2" href="https://x.com/infoonionntoken?s=21" class="btn" target="_blank">Twitter/X</a>
+        <a id="btnGitHub2" href="https://github.com/Blaznikolj/.-onion-token" class="btn" target="_blank">GitHub</a>
+      </div>
     </section>
 
     <!-- FAQ -->
     <section class="faq">
-        <h2>FAQ</h2>
-        <p><strong>What is the total supply?</strong> 1,000,000,000 .ONION </p>
-        <p><strong>Is there any tax?</strong> 0% (Fair Launch).</p>
-        <p><strong>How can I buy Onion Token?</strong> On PancakeSwap using the contract address.</p>
+      <h2 id="faqHeader">FAQ</h2>
+      <p id="faq1"><strong>What is the total supply?</strong> 1,000,000,000 .ONION</p>
+      <p id="faq2"><strong>Is there any tax?</strong> 0% (Fair Launch).</p>
+      <p id="faq3"><strong>How can I buy Onion Token?</strong> On PancakeSwap using the contract address.</p>
     </section>
-<footer class="footer">
-    <p>© 2025 Onion Token | <a class="btn" href="https://oniontoken.world/Onion_Token_Whitepaper_Updated_with_Logo.pdf" target="_blank" rel="noopener">Whitepaper </a> </p>
-    <p>Contact: <a href="mailto:info@oniontoken.world">info@oniontoken.world</a></p>
-</footer>
-    
+
+    <footer class="footer">
+      <p id="footer1">©️ 2025 Onion Token | <a class="btn" href="https://oniontoken.world/Onion_Token_Whitepaper_Updated_with_Logo.pdf" target="_blank" rel="noopener">Whitepaper</a></p>
+      <p id="footer2">Contact: <a href="mailto:info@oniontoken.world">info@oniontoken.world</a></p>
+    </footer>
+
+    <!-- Sticky Buy button (visible on all pages) -->
+    <a href="https://buy.oniontoken.world" target="_blank" rel="noopener" class="buy-fab" aria-label="Buy .Onion">
+      <img src="https://oniontoken.world/images/onion_logo_multicolor.svg" alt=".Onion logo">
+      <span id="buyFabLabel" class="label">Buy .Onion</span>
+    </a>
+
+<script>
+// --- i18n dictionary ---
+const dict = {
+  en: {
+    navCommunity: "Community",
+    navTwitter: "Twitter",
+    navGitHub: "GitHub",
+    navContract: "Contract",
+    heroTitle: "Welcome to Onion Token",
+    heroSubtitle: "Decentralized, anonymous and community-driven cryptocurrency.",
+    btnJoin: "💬 Join Community",
+    btnPCS: "💲 Buy on PancakeSwap",
+    btnBscScan: "📜 View on BscScan",
+    btnLock: "🔒 View Token Lock",
+    btnDex: "📈 View on DexScreener (PancakeSwap)",
+    contractHeader: "Smart Contract Address (BSC)",
+    aboutHeader: "What is Onion Token?",
+    aboutP1: "Onion Token is a decentralized cryptocurrency built on the Binance Smart Chain (BSC). Our mission is to create a secure, anonymous, and community-driven ecosystem where users have full control over their finances.",
+    whyHeader: "Why Choose Onion Token?",
+    whyL1: "<strong>Privacy first:</strong> Advanced security and anonymity features.",
+    whyL2: "<strong>Community-owned:</strong> Fully decentralized with no taxes or private sales.",
+    whyL3: "<strong>Utility:</strong> Staking, DeFi integrations, and upcoming dApps.",
+    whyL4: "<strong>Strong roadmap:</strong> Clear development goals and milestones.",
+    launchP: "The project was launched as a fair launch with <strong>0% taxes</strong> and a total supply of <strong>1,000,000,000 $ONION</strong>. The token is fully owned by the community – there are no private sales or hidden developer allocations.",
+    focusP: "Onion Token is focused on developing privacy tools, staking opportunities, and decentralized applications (dApps) that reward loyal holders and increase real utility.",
+    gettingHeader: "Getting Started",
+    gs1: "<strong>Choose a crypto wallet:</strong> Install MetaMask, TrustWallet, or any BSC-compatible wallet.",
+    gs2: "<strong>Buy Onion Token:</strong> Purchase on PancakeSwap using the contract address.",
+    gs3: "<strong>Hold or stake:</strong> Earn rewards and support the network by holding or staking your tokens.",
+    tokenomicsHeader: "Tokenomics",
+    roadmapHeader: "Roadmap",
+    r1: "<strong>Q3 2025:</strong> Fair launch, DEX listings, first DeFi partners.",
+    r2: "<strong>Q4 2025:</strong> Staking platform, first NFT drops, expand marketing.",
+    r3: "<strong>Q1 2026:</strong> CEX listings, more DeFi integrations, advanced privacy features.",
+    communityHeader: "Join the Community",
+    btnTelegram2: "Telegram",
+    btnTwitter2: "Twitter/X",
+    btnGitHub2: "GitHub",
+    faqHeader: "FAQ",
+    faq1: "<strong>What is the total supply?</strong> 1,000,000,000 .ONION",
+    faq2: "<strong>Is there any tax?</strong> 0% (Fair Launch).",
+    faq3: "<strong>How can I buy Onion Token?</strong> On PancakeSwap using the contract address.",
+    footer1: "©️ 2025 Onion Token | <a class=\"btn\" href=\"https://oniontoken.world/Onion_Token_Whitepaper_Updated_with_Logo.pdf\" target=\"_blank\" rel=\"noopener\">Whitepaper</a>",
+    footer2: "Contact: <a href=\"mailto:info@oniontoken.world\">info@oniontoken.world</a>",
+    buyFabLabel: "Buy .Onion"
+  },
+  si: {
+    navCommunity: "Skupnost",
+    navTwitter: "Twitter",
+    navGitHub: "GitHub",
+    navContract: "Pogodba",
+    heroTitle: "Dobrodošli v Onion Token",
+    heroSubtitle: "Decentralizirana, anonimna in skupnostno vodena kriptovaluta.",
+    btnJoin: "💬 Pridruži se skupnosti",
+    btnPCS: "💲 Kupi na PancakeSwap",
+    btnBscScan: "📜 Ogled na BscScan",
+    btnLock: "🔒 Zaklep žetonov",
+    btnDex: "📈 Ogled na DexScreener (PancakeSwap)",
+    contractHeader: "Naslov pametne pogodbe (BSC)",
+    aboutHeader: "Kaj je Onion Token?",
+    aboutP1: "Onion Token je decentralizirana kriptovaluta na verigi Binance Smart Chain (BSC). Naše poslanstvo je ustvariti varen, anonimen in skupnostno voden ekosistem, kjer imajo uporabniki popoln nadzor nad svojimi financami.",
+    whyHeader: "Zakaj izbrati Onion Token?",
+    whyL1: "<strong>Najprej zasebnost:</strong> Napredne varnostne in anonimnostne funkcije.",
+    whyL2: "<strong>V lasti skupnosti:</strong> Popolnoma decentraliziran, brez davkov in zasebnih prodaj.",
+    whyL3: "<strong>Uporabnost:</strong> Staking, DeFi integracije in prihajajoče dApp aplikacije.",
+    whyL4: "<strong>Jasen načrt:</strong> Jasni razvojni cilji in mejniki.",
+    launchP: "Projekt je bil zagnan kot pošten zagon z <strong>0% davki</strong> in skupno zalogo <strong>1,000,000,000 $ONION</strong>. Žeton je v celoti v lasti skupnosti – ni zasebnih prodaj ali skritih deležev razvijalcev.",
+    focusP: "Onion Token se osredotoča na razvoj orodij za zasebnost, staking priložnosti in decentralizirane aplikacije (dApps), ki nagrajujejo zveste imetnike in povečujejo realno uporabnost.",
+    gettingHeader: "Kako začeti",
+    gs1: "<strong>Izberi kripto denarnico:</strong> Namesti MetaMask, TrustWallet ali katerokoli BSC‑združljivo denarnico.",
+    gs2: "<strong>Kupi Onion Token:</strong> Nakup na PancakeSwap z uporabo naslova pogodbe.",
+    gs3: "<strong>Hrani ali stakaj:</strong> Prisluži nagrade in podpri omrežje z držanjem ali stakingom žetonov.",
+    tokenomicsHeader: "Tokenomika",
+    roadmapHeader: "Načrt",
+    r1: "<strong>Q3 2025:</strong> Pošten zagon, DEX uvrstitve, prvi DeFi partnerji.",
+    r2: "<strong>Q4 2025:</strong> Staking platforma, prvi NFT izpusti, razširjen marketing.",
+    r3: "<strong>Q1 2026:</strong> CEX uvrstitve, več DeFi integracij, napredne funkcije zasebnosti.",
+    communityHeader: "Pridruži se skupnosti",
+    btnTelegram2: "Telegram",
+    btnTwitter2: "Twitter/X",
+    btnGitHub2: "GitHub",
+    faqHeader: "FAQ",
+    faq1: "<strong>Kakšna je skupna zaloga?</strong> 1,000,000,000 .ONION",
+    faq2: "<strong>Ali je kakšen davek?</strong> 0% (Pošten zagon).",
+    faq3: "<strong>Kako kupim Onion Token?</strong> Na PancakeSwap z uporabo naslova pogodbe.",
+    footer1: "©️ 2025 Onion Token | <a class=\"btn\" href=\"https://oniontoken.world/Onion_Token_Whitepaper_Updated_with_Logo.pdf\" target=\"_blank\" rel=\"noopener\">Bela knjiga</a>",
+    footer2: "Kontakt: <a href=\"mailto:info@oniontoken.world\">info@oniontoken.world</a>",
+    buyFabLabel: "Kupi .Onion"
+  }
+};
+
+const ids = [
+  "navCommunity","navTwitter","navGitHub","navContract",
+  "heroTitle","heroSubtitle","btnJoin","btnPCS","btnBscScan","btnLock","btnDex",
+  "contractHeader","aboutHeader","aboutP1","whyHeader","whyL1","whyL2","whyL3","whyL4",
+  "launchP","focusP","gettingHeader","gs1","gs2","gs3",
+  "tokenomicsHeader","roadmapHeader","r1","r2","r3",
+  "communityHeader","btnTelegram2","btnTwitter2","btnGitHub2",
+  "faqHeader","faq1","faq2","faq3","footer1","footer2","buyFabLabel"
+];
+
+function applyLang(lang){
+  const L = dict[lang];
+  ids.forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.innerHTML = L[id];
+  });
+  // toggle buttons state
+  document.getElementById('lang-en').classList.toggle('active', lang==='en');
+  document.getElementById('lang-si').classList.toggle('active', lang==='si');
+  // store preference
+  localStorage.setItem('site_lang', lang);
+}
+
+function initLang(){
+  const saved = localStorage.getItem('site_lang');
+  const lang = saved || 'en';
+  applyLang(lang);
+  document.getElementById('lang-en').addEventListener('click', ()=>applyLang('en'));
+  document.getElementById('lang-si').addEventListener('click', ()=>applyLang('si'));
+}
+document.addEventListener('DOMContentLoaded', initLang);
+</script>
+
 </body>
 </html>
