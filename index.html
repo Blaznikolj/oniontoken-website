@@ -1,262 +1,126 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Buy .Onion</title>
-  <style>
-    html,body{margin:0;background:#0b0f17;color:#e6e8ec;font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif}
-    .wrap{max-width:720px;margin:40px auto;padding:24px;background:#111827;border:1px solid #1f2937;border-radius:16px}
-    .card{background:#0f1624;border:1px solid #1f2937;border-radius:12px;padding:16px;margin:16px 0}
-    .row{display:flex;gap:12px;align-items:center}
-    .row>*{flex:1}
-    label{display:block;font-size:14px;color:#9aa4b2;margin-bottom:8px}
-    select,input{width:100%;padding:12px 14px;border-radius:10px;border:1px solid #263248;background:#0b1220;color:#e6e8ec;font-size:16px}
-    button{cursor:pointer;padding:12px 16px;border:0;border-radius:10px;font-weight:700}
-    .primary{background:#27c193;color:#08131a}
-    .secondary{background:#1f2937;color:#e6e8ec}
-    .muted{color:#9aa4b2;font-size:13px}
-    .ok{color:#27c193;white-space:pre-line;font-size:13px;display:none}
-    .err{color:#ff6b6b;white-space:pre-line;font-size:13px;display:none}
-    .lang{position:fixed;right:16px;top:16px;display:flex;gap:8px;z-index:10}
-    .lang button{background:#1f2937;color:#e6e8ec;border:0;border-radius:8px;padding:6px 10px;font-weight:700}
-    .lang button.active{background:#27c193;color:#08131a}
-    @supports(padding:max(0px)){
-      .lang{right:max(16px,env(safe-area-inset-right));top:max(16px,env(safe-area-inset-top))}
-    }
-  </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Onion Token</title>
+<link rel="stylesheet" href="style.css">
 </head>
 <body>
-  <!-- language switch -->
-  <div class="lang">
-    <button id="bEN" class="active">GB EN</button>
-    <button id="bSI">SI SI</button>
-  </div>
+    <!-- HEADER -->
+    <header class="header">
+</div>
+        <nav>
+            <a href="https://t.me/OnionTokenProject" target="_blank">Community</a>
+            <a href="https://x.com/infoonionntoken?s=21" target="_blank">Twitter</a>
+            <a href="https://github.com/Blaznikolj/.-onion-token" target="_blank">GitHub</a>
+            <a href="https://bscscan.com/token/0xf95a185f32aea4ae5e944bbc0f6c72687e607b0a" target="_blank">Contract</a>
+        </nav>
+    </header>
 
-  <div class="wrap">
-    <h1 id="tTitle">Buy .Onion</h1>
-    <p class="muted" id="tSub">PCS V2 Router • BNB or USDT (multi‑hop USDT→WBNB→.Onion) • addresses in lowercase.</p>
+    <!-- HERO -->
+    <section class="hero">
+        <div class="hero-content">
+            <img src="images/Onion_Token_Logo_256x256.png" 
+     alt="Onion Token Logo" 
+     style="display:block; margin: 0 auto; width: 300px; height: auto;">
+            
+            <h1>Welcome to Onion Token</h1>
+            <p>Decentralized, anonymous and community-driven cryptocurrency.</p>
+            <div class="buttons">
+                
+                <a href="https://t.me/OnionTokenProject" class="btn" target="_blank">💬 Join Community</a>
+                <a href="https://pancakeswap.finance/swap?outputCurrency=0xf95a185f32aea4ae5e944bbc0f6c72687e607b0a" class="btn" target="_blank">💲 Buy on PancakeSwap</a>
+                <a href="https://bscscan.com/token/0xf95a185f32aea4ae5e944bbc0f6c72687e607b0a" class="btn" target="_blank">📜 View on BscScan</a>
+                <a href="https://www.pinksale.finance/pinklock/bsc/record/1343005" class="btn" target="_blank">🔒 View Token Lock</a>
+<a href="https://dexscreener.com/bsc/0x37278d454b49fc7286daa89fd1ba3acd52b797e3" 
+   class="btn" target="_blank">
+    📈 View on DexScreener (PancakeSwap)
 
-    <div class="card">
-      <div><span id="tNetwork">Network</span>: <b id="net">—</b> • <span id="tWallet">Wallet</span>: <b id="acct">—</b></div>
-      <div class="row" style="margin-top:12px">
-        <!-- IMPORTANT: only ONE id attribute -->
-        <button id="connect" class="primary">Connect wallet</button>
-        <button id="addTok" class="secondary">Add .Onion to wallet</button>
-      </div>
-      <div id="status" class="ok"></div>
-      <div id="error" class="err"></div>
-    </div>
 
-    <div class="card">
-      <div class="row">
-        <div>
-          <label id="tPayWith">Pay with</label>
-          <select id="pay"><option>BNB</option><option>USDT</option></select>
+            </div>
         </div>
-        <div>
-          <label>Slippage (%)</label>
-          <input id="slip" type="number" min="0.1" step="0.1" value="1.0" />
+    </section>
+
+    <!-- CONTRACT ADDRESS -->
+    <section class="contract">
+        <h2>Smart Contract Address (BSC)</h2>
+        <p class="address">0xf95a185f32aea4ae5e944bbc0f6c72687e607b0a</p>
+    </section>
+
+    <!-- ABOUT -->
+    <section class="about">
+    <h2>What is Onion Token?</h2>
+    <p>Onion Token is a decentralized cryptocurrency built on the Binance Smart Chain (BSC). 
+    Our mission is to create a secure, anonymous, and community-driven ecosystem where users 
+    have full control over their finances.</p>
+
+    <section class="why">
+    <h2>Why Choose Onion Token?</h2>
+    <ul>
+        <li><strong>Privacy first:</strong> Advanced security and anonymity features.</li>
+        <li><strong>Community-owned:</strong> Fully decentralized with no taxes or private sales.</li>
+        <li><strong>Utility:</strong> Staking, DeFi integrations, and upcoming dApps.</li>
+        <li><strong>Strong roadmap:</strong> Clear development goals and milestones.</li>
+    </ul>
+</section>   
+
+    <p>The project was launched as a fair launch with <strong>0% taxes</strong> and a 
+    total supply of <strong>1,000,000,000 $ONION</strong>. The token is fully owned by 
+    the community – there are no private sales or hidden developer allocations.</p>
+
+    <p>Onion Token is focused on developing privacy tools, staking opportunities, and 
+    decentralized applications (dApps) that reward loyal holders and increase real utility.</p>
+</section>
+
+    <!-- GETTING STARTED -->
+    <section class="getting-started">
+        <h2>Getting Started</h2>
+        <ol>
+    <li><strong>Choose a crypto wallet:</strong> Install MetaMask, TrustWallet, or any BSC-compatible wallet.</li>
+    <li><strong>Buy Onion Token:</strong> Purchase on PancakeSwap using the contract address.</li>
+    <li><strong>Hold or stake:</strong> Earn rewards and support the network by holding or staking your tokens.</li>
+</ol>
+    </section>
+
+    <!-- TOKENOMICS -->
+    <section class="tokenomics">
+        <h2>Tokenomics</h2>
+        <img src="tokenomics.png" alt="Tokenomics Diagram">
+        
+    </section>
+
+    <!-- ROADMAP -->
+    <section class="roadmap">
+        <h2>Roadmap</h2>
+        <ul>
+            <li><strong>Q3 2025:</strong> Fair launch, DEX listings, first DeFi partners.</li>
+            <li><strong>Q4 2025:</strong> Staking platform, first NFT drops, expand marketing.</li>
+            <li><strong>Q1 2026:</strong> CEX listings, more DeFi integrations, advanced privacy features.</li>
+        </ul>
+    </section>
+
+    <!-- COMMUNITY -->
+    <section class="community">
+        <h2>Join the Community</h2>
+        <div class="buttons">
+            <a href="https://t.me/OnionTokenProject" class="btn" target="_blank">Telegram</a>
+            <a href="https://x.com/infoonionntoken?s=21" class="btn" target="_blank">Twitter/X</a>
+            <a href="https://github.com/Blaznikolj/.-onion-token" class="btn" target="_blank">GitHub</a>
         </div>
-      </div>
+    </section>
 
-      <div class="row" style="margin-top:12px">
-        <div>
-          <label id="tAmount">Amount</label>
-          <input id="amt" type="number" step="0.0001" placeholder="e.g. 0.02 (BNB) or 10 (USDT)" />
-        </div>
-        <div>
-          <label>&nbsp;</label>
-          <div class="row">
-            <button id="quote" class="secondary">Quote</button>
-            <button id="buy" class="primary">Buy</button>
-          </div>
-        </div>
-      </div>
-      <div id="q" class="muted" style="margin-top:10px">—</div>
-    </div>
-  </div>
-
-  <!-- ethers v6 from CDN -->
-  <script src="https://cdn.jsdelivr.net/npm/ethers@6.13.1/dist/ethers.umd.min.js"></script>
-  <script>
-  (function(){
-    // ---- constants (lowercase) ----
-    const TOKEN  = "0xf95a185f32aea4ae5e944bbc0f6c72687e607b0a";
-    const WBNB   = "0xbb4cdb9cbd36b01bd1cbaebf2de08d9173bc095c";
-    const USDT   = "0x55d398326f99059ff775485246999027b3197955";
-    const ROUTER = "0x10ed43c718714eb63d5aa57b78b54704e256024e";
-    const CHAIN  = "0x38"; // BSC
-
-    // ---- ABIs ----
-    const routerAbi = [
-      "function getAmountsOut(uint256 amountIn, address[] calldata path) external view returns (uint256[] memory)",
-      "function swapExactETHForTokensSupportingFeeOnTransferTokens(uint amountOutMin, address[] calldata path, address to, uint deadline) external payable",
-      "function swapExactTokensForTokensSupportingFeeOnTransferTokens(uint amountIn, uint amountOutMin, address[] calldata path, address to, uint deadline) external"
-    ];
-    const erc20Abi = [
-      "function decimals() view returns (uint8)",
-      "function allowance(address owner, address spender) view returns (uint256)",
-      "function approve(address spender, uint256 amount) external returns (bool)"
-    ];
-
-    // ---- helpers ----
-    const $ = (id)=>document.getElementById(id);
-    const showOk  = (t)=>{ $("status").style.display="block"; $("status").textContent=t; $("error").style.display="none"; };
-    const showErr = (t)=>{ $("error").style.display="block"; $("error").textContent=t; $("status").style.display="none"; };
-    const fmt = (n, d=6)=>Number(n).toLocaleString(undefined,{maximumFractionDigits:d});
-
-    let provider, signer, account, router, usdt;
-
-    async function ensureChain(){
-      if(!window.ethereum) throw new Error("MetaMask not detected.");
-      const id = await window.ethereum.request({method:"eth_chainId"});
-      if(id !== CHAIN){
-        try{
-          await window.ethereum.request({method:"wallet_switchEthereumChain", params:[{chainId:CHAIN}]});
-        }catch(e){
-          await window.ethereum.request({method:"wallet_addEthereumChain", params:[{
-            chainId:CHAIN, chainName:"BSC",
-            nativeCurrency:{name:"BNB",symbol:"BNB",decimals:18},
-            rpcUrls:["https://bsc-dataseed.binance.org/"], blockExplorerUrls:["https://bscscan.com/"]
-          }]});
-          await window.ethereum.request({method:"wallet_switchEthereumChain", params:[{chainId:CHAIN}]});
-        }
-      }
-    }
-
-    async function connect(){
-      try{
-        await ensureChain();
-        provider = new ethers.BrowserProvider(window.ethereum);
-        // ključna vrstica – prisili MetaMask dialog
-        await provider.send("eth_requestAccounts", []);
-        signer   = await provider.getSigner();
-        account  = await signer.getAddress();
-        router   = new ethers.Contract(ROUTER, routerAbi, signer);
-        usdt     = new ethers.Contract(USDT, erc20Abi, signer);
-        $("net").textContent = "BSC (56)";
-        $("acct").textContent = account.slice(0,6)+"…"+account.slice(-4);
-        showOk(t("ok_connected"));
-      }catch(e){ showErr(e.message||String(e)); }
-    }
-
-    function toWei(amount,dec){ return BigInt(Math.floor(Number(amount)(10*dec))); }
-
-    async function getQuote(){
-      try{
-        await ensureChain();
-        if(!router) router = new ethers.Contract(ROUTER, routerAbi, (await (new ethers.BrowserProvider(window.ethereum)).getSigner()));
-        const pay = $("pay").value;
-        const amt = parseFloat($("amt").value);
-        if(!amt || amt<=0) throw new Error(t("err_amount"));
-        let path, amountIn, sym;
-        if(pay==="BNB"){
-          path=[WBNB,TOKEN];
-          amountIn=ethers.parseEther(String(amt));
-          sym="BNB";
-        }else{
-          const signer = await (new ethers.BrowserProvider(window.ethereum)).getSigner();
-          const usdtD = await (new ethers.Contract(USDT, ["function decimals() view returns (uint8)"], signer)).decimals();
-          path=[USDT,WBNB,TOKEN];
-          amountIn=toWei(amt, usdtD);
-          sym="USDT";
-        }
-        let amounts;
-        try{ amounts = await router.getAmountsOut(amountIn, path); }
-        catch{ throw new Error(t("err_quote")); }
-        const out = amounts[amounts.length-1];
-        const sl = Math.max(0.1, parseFloat($("slip").value||"1"));
-        const minOut = out - (out * BigInt(Math.floor(sl*1000)) / 100000n);
-        $("q").innerHTML = t("quote_line", {amt, sym, out:Number(out)/1e18, min:Number(minOut)/1e18, sl});
-        return {pay, amountIn, minOut, path};
-      }catch(e){ showErr(e.message||String(e)); throw e; }
-    }
-
-    async function buy(){
-      try{
-        const {pay, amountIn, minOut, path} = await getQuote();
-        const deadline = Math.floor(Date.now()/1000)+15*60;
-        if(pay==="BNB"){
-          const tx = await router.swapExactETHForTokensSupportingFeeOnTransferTokens(minOut, path, account, deadline, {value:amountIn});
-          showOk(t("ok_buying")); const rc=await tx.wait(); showOk(t("ok_tx", {hash:rc.hash}));
-        }else{
-          const allowance = await usdt.allowance(account, ROUTER);
-          if(allowance < amountIn){ showOk(t("ok_approve")); const txx=await usdt.approve(ROUTER, amountIn); await txx.wait(); }
-          const tx = await router.swapExactTokensForTokensSupportingFeeOnTransferTokens(amountIn, minOut, path, account, deadline);
-          showOk(t("ok_buying")); const rc=await tx.wait(); showOk(t("ok_tx", {hash:rc.hash}));
-        }
-      }catch(e){ showErr(e.message||String(e)); }
-    }
-
-    async function addTok(){
-      try{
-        await window.ethereum.request({method:"wallet_watchAsset", params:{type:"ERC20", options:{address:TOKEN, symbol:".Onion", decimals:18}}});
-      }catch(e){ showErr(e.message||String(e)); }
-    }
-
-    // i18n
-    const L = {
-      en: {
-        title:"Buy .Onion",
-        sub:"PCS V2 Router • BNB or USDT (multi‑hop USDT→WBNB→.Onion) • addresses in lowercase.",
-        network:"Network", wallet:"Wallet",
-        paywith:"Pay with", amount:"Amount",
-        btn_quote:"Quote", btn_buy:"Buy",
-        ok_connected:"Wallet connected.",
-        err_amount:"Enter an amount.",
-        err_quote:"Quote failed (no path on PCS V2 or empty reserves).",
-        ok_buying:"Processing purchase…",
-        ok_tx:"Success! Tx: https://bscscan.com/tx/{hash}",
-        ok_approve:"Approving USDT…",
-        quote_line:"Pay: <b>{amt}</b> {sym}<br>Receive ~ <b>{out}</b> .Onion<br>MinOut ({sl}%): <b>{min}</b>"
-      },
-      si: {
-        title:"Kupi .Onion",
-        sub:"PCS V2 Router • BNB ali USDT (multi‑hop USDT→WBNB→.Onion) • naslovi v lowercase.",
-        network:"Omrežje", wallet:"Denarnica",
-        paywith:"Plačilo z", amount:"Znesek",
-        btn_quote:"Kotacija", btn_buy:"Kupi",
-        ok_connected:"Denarnica povezana.",
-        err_amount:"Vnesi znesek.",
-        err_quote:"Kotacija ni uspela (ni poti na PCS V2 ali prazne rezerve).",
-        ok_buying:"Nakup v teku …",
-        ok_tx:"Uspeh! Tx: https://bscscan.com/tx/{hash}",
-        ok_approve:"Odobritev USDT…",
-        quote_line:"Plačilo: <b>{amt}</b> {sym}<br>Prejmeš približno: <b>{out}</b> .Onion<br>MinOut ({sl}%): <b>{min}</b>"
-      }
-    };
-    function t(key, vars){
-      const lang = document.body.getAttribute("data-lang")||"en";
-      let s = L[lang][key]||key;
-      if(vars) for(const k in vars) s = s.replaceAll({${k}}, String(vars[k]));
-      return s;
-    }
-    function applyLang(lang){
-      document.body.setAttribute("data-lang", lang);
-      $("tTitle").textContent    = t("title");
-      $("tSub").textContent      = t("sub");
-      $("tNetwork").textContent  = t("network");
-      $("tWallet").textContent   = t("wallet");
-      $("tPayWith").textContent  = t("paywith");
-      $("tAmount").textContent   = t("amount");
-      $("quote").textContent     = t("btn_quote");
-      $("buy").textContent       = t("btn_buy");
-      $("bEN").classList.toggle("active", lang==="en");
-      $("bSI").classList.toggle("active", lang==="si");
-    }
-
-    // events
-    $("connect").addEventListener("click", connect);
-    $("quote").addEventListener("click", getQuote);
-    $("buy").addEventListener("click", buy);
-    $("addTok").addEventListener("click", addTok);
-    $("bEN").addEventListener("click", ()=>{localStorage.setItem("lang","en"); applyLang("en")});
-    $("bSI").addEventListener("click", ()=>{localStorage.setItem("lang","si"); applyLang("si")});
-
-    // init
-    applyLang(localStorage.getItem("lang")||"en");
-  })();
-  </script>
+    <!-- FAQ -->
+    <section class="faq">
+        <h2>FAQ</h2>
+        <p><strong>What is the total supply?</strong> 1,000,000,000 .ONION </p>
+        <p><strong>Is there any tax?</strong> 0% (Fair Launch).</p>
+        <p><strong>How can I buy Onion Token?</strong> On PancakeSwap using the contract address.</p>
+    </section>
+<footer class="footer">
+    <p>© 2025 Onion Token | <a class="btn" href="https://oniontoken.world/Onion_Token_Whitepaper_Updated_with_Logo.pdf" target="_blank" rel="noopener">Whitepaper </a> </p>
+    <p>Contact: <a href="mailto:info@oniontoken.world">info@oniontoken.world</a></p>
+</footer>
+    
 </body>
 </html>
