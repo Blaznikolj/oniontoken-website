@@ -33,7 +33,7 @@
 
   <div class="wrap">
     <h1 id="tTitle">Buy .Onion</h1>
-    <p class="muted" id="tSub">PCS V2 Router • BNB or USDT (multi-hop USDT→WBNB→.Onion) • addresses in lowercase.</p>
+    <p class="muted" id="tSub">PCS V2 Router • BNB or USDT (multi‑hop USDT→WBNB→.Onion) • addresses in lowercase.</p>
 
     <div class="card">
       <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
@@ -88,11 +88,12 @@
 
   <script>
   (function(){
+    // ==== CONFIG ====
     const TOKEN  = "0xf95a185f32aea4ae5e944bbc0f6c72687e607b0a";
     const WBNB   = "0xbb4cdb9cbd36b01bd1cbaebf2de08d9173bc095c";
     const USDT   = "0x55d398326f99059ff775485246999027b3197955";
     const ROUTER = "0x10ed43c718714eb63d5aa57b78b54704e256024e";
-    const CHAIN_HEX = "0x38";
+    const CHAIN_HEX = "0x38";               // BSC
     const CHAIN_ID  = 56;
     const RPC_BSC   = "https://bsc-dataseed.binance.org";
     const WC_PROJECT_ID = "5fd10d829d57b05296f4846c5ce385b8";
@@ -108,11 +109,12 @@
       "function approve(address spender, uint256 amount) external returns (bool)"
     ];
 
+    // ==== HELPERS & STATE ====
     const $ = (id)=>document.getElementById(id);
     const ok  = (t)=>{ $("status").style.display="block"; $("status").textContent=t; $("error").style.display="none"; };
     const err = (t)=>{ $("error").style.display="block"; $("error").textContent=t; $("status").style.display="none"; };
     const toWei = (amt, dec) => {
-      const n = Number(amt);
+      const n = Number(String(amt).replace(",", "."));
       if (!isFinite(n) || n <= 0) return 0n;
       const f = 10 ** Math.min(dec, 18);
       return BigInt(Math.round(n * f));
@@ -149,6 +151,7 @@
       }
     }
 
+    // Injected wallets (MetaMask, Trust Wallet extension, …)
     async function connectInjected(){
       try{
         const eth = window.ethereum;
@@ -161,9 +164,9 @@
       }catch(e){ err(e.message||String(e)); }
     }
 
+    // WalletConnect (QR + mobilne denarnice)
     async function connectWalletConnect(){
       try{
-        if(!WC_PROJECT_ID || WC_PROJECT_ID.startsWith("REPLACE_")) throw new Error("Missing WalletConnect Project ID.");
         wcProvider = await WalletConnectEthereumProvider.default.init({
           projectId: WC_PROJECT_ID,
           chains: [CHAIN_ID],
@@ -181,9 +184,9 @@
       }catch(e){ err(e.message||String(e)); }
     }
 
+    // Tiha (auto) ponovna povezava WalletConnect, če seja že obstaja
     async function tryAutoWalletConnect(){
       try{
-        if(!WC_PROJECT_ID || WC_PROJECT_ID.startsWith("REPLACE_")) return;
         const p = await WalletConnectEthereumProvider.default.init({
           projectId: WC_PROJECT_ID,
           chains: [CHAIN_ID],
@@ -192,14 +195,14 @@
           showQrModal: false,
           rpcMap: { [CHAIN_ID]: RPC_BSC }
         });
-        await p.enable();
+        await p.enable(); // uspe, če obstaja prejšnja seja
         wcProvider = p;
         try { await ensureChain(wcProvider); } catch(_){}
         provider = new ethers.BrowserProvider(wcProvider);
         signer   = await provider.getSigner();
         bindWcEvents();
         afterConnect("WalletConnect", wcProvider);
-      }catch(_){}
+      }catch(_){ /* ni obstoječe seje */ }
     }
 
     function bindWcEvents(){
@@ -216,15 +219,15 @@
         $("acct").textContent=account.slice(0,6)+"…"+account.slice(-4);
         setConnUI(kind);
         ok(t("ok_connected"));
+        // spremljaj spremembe pri injected walletih
         eth?.on?.("accountsChanged", async ()=>{ if(kind==="Injected") try{ await connectInjected(); }catch{} });
         eth?.on?.("chainChanged",   async ()=>{ if(kind==="Injected") try{ await connectInjected(); }catch{} });
       }catch(e){ err(e.message||String(e)); }
     }
 
     async function disconnect(){
-      try{
-        if(wcProvider){ await wcProvider.disconnect?.(); }
-      }finally{ clearState(); }
+      try{ if(wcProvider){ await wcProvider.disconnect?.(); } }
+      finally{ clearState(); }
     }
 
     async function getRouterEnsured(){
@@ -241,7 +244,7 @@
       try{
         const r = await getRouterEnsured();
         const pay = $("pay").value;
-        const amt = parseFloat($("amt").value);
+        const amt = parseFloat(String($("amt").value).replace(",", "."));
         if(!amt || amt<=0) throw new Error(t("err_amount"));
 
         let path, amountIn, sym;
@@ -261,8 +264,10 @@
         catch{ throw new Error(t("err_quote")); }
 
         const out = amounts[amounts.length-1];
-        const sl = Math.max(0.1, parseFloat($("slip").value||"1"));
-        const minOut = out - (out * BigInt(Math.floor(sl*1000)) / 100000n);
+        const sl = Math.max(0.1, parseFloat(String($("slip").value).replace(",", ".") || "1"));
+        const slUnits = BigInt(Math.floor(sl*1000)); // 1.0% = 1000 / 100000
+        const minOut = out - (out * slUnits) / 100000n;
+
         $("q").style.display="block";
         $("q").innerHTML = t("quote_line", {amt, sym, out:Number(out)/1e18, min:Number(minOut)/1e18, sl});
         return {pay, amountIn, minOut, path};
@@ -301,9 +306,10 @@
       }catch(e){ err(e.message||String(e)); }
     }
 
+    // ==== i18n ====
     const L = {
       en:{title:"Buy .Onion",
-          sub:"PCS V2 Router • BNB or USDT (multi-hop USDT→WBNB→.Onion) • addresses in lowercase.",
+          sub:"PCS V2 Router • BNB or USDT (multi‑hop USDT→WBNB→.Onion) • addresses in lowercase.",
           network:"Network", wallet:"Wallet", paywith:"Pay with", amount:"Amount",
           btn_quote:"Quote", btn_buy:"Buy",
           ok_connected:"Wallet connected.",
@@ -315,7 +321,7 @@
           ok_approve:"Approving USDT…",
           quote_line:"Pay: <b>{amt}</b> {sym}<br>Receive ~ <b>{out}</b> .Onion<br>MinOut ({sl}%): <b>{min}</b>"},
       si:{title:"Kupi .Onion",
-          sub:"PCS V2 Router • BNB ali USDT (multi-hop USDT→WBNB→.Onion) • naslovi v lowercase.",
+          sub:"PCS V2 Router • BNB ali USDT (multi‑hop USDT→WBNB→.Onion) • naslovi v lowercase.",
           network:"Omrežje", wallet:"Denarnica", paywith:"Plačilo z", amount:"Znesek",
           btn_quote:"Kotacija", btn_buy:"Kupi",
           ok_connected:"Denarnica povezana.",
@@ -330,4 +336,41 @@
 
     function t(key, vars){
       const lang = document.body.getAttribute("data-lang") || "en";
-      let s = (L[lang] && L[lang][key]) ? L
+      let s = (L[lang] && L[lang][key]) ? L[lang][key] : key;
+      if (vars) for (const k in vars) s = s.replace(new RegExp("\\{"+k+"\\}","g"), String(vars[k]));
+      return s;
+    }
+
+    function applyLang(lang){
+      document.body.setAttribute("data-lang", lang);
+      $("tTitle").textContent = t("title");
+      $("tSub").textContent   = t("sub");
+      $("tNetwork").textContent = t("network");
+      $("tWallet").textContent  = t("wallet");
+      $("tPayWith").textContent = t("paywith");
+      $("tAmount").textContent  = t("amount");
+      $("quote").textContent    = t("btn_quote");
+      $("buy").textContent      = t("btn_buy");
+      $("bEN").classList.toggle("active", lang==="en");
+      $("bSI").classList.toggle("active", lang==="si");
+    }
+
+    // ==== EVENTS ====
+    window.addEventListener("DOMContentLoaded", ()=>{
+      applyLang("en");
+      $("bEN").addEventListener("click", ()=>applyLang("en"));
+      $("bSI").addEventListener("click", ()=>applyLang("si"));
+      $("connect").addEventListener("click", connectInjected);
+      $("connectWc").addEventListener("click", connectWalletConnect);
+      $("disconnect").addEventListener("click", disconnect);
+      $("quote").addEventListener("click", getQuote);
+      $("buy").addEventListener("click", buy);
+      $("addTok").addEventListener("click", addTok);
+
+      // Avtomatska ponovna povezava WalletConnect (če obstaja seja)
+      tryAutoWalletConnect();
+    });
+  })();
+  </script>
+</body>
+</html>
