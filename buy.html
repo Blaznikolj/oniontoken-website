@@ -95,11 +95,13 @@
       "function approve(address spender, uint256 amount) external returns (bool)"
     ];
 
-    const $ = (id)=>document.getElementById(id);
-    const ok  = (t)=>{ $("status").style.display="block"; $("status").textContent=t; $("error").style.display="none"; };
-    const err = (t)=>{ $("error").style.display="block"; $("error").textContent=t; $("status").style.display="none"; };
-    const toWei = (amt, dec) => BigInt(Math.round(Number(amt) * (10 ** dec)));
-    const fmt = (n,d=6)=>Number(n).toLocaleString(undefined,{maximumFractionDigits:d});
+    const $  = (id)=>document.getElementById(id);
+    const ok = (t)=>{ $("status").style.display="block"; $("status").textContent=t; $("error").style.display="none"; };
+    const err= (t)=>{ $("error").style.display="block"; $("error").textContent=t; $("status").style.display="none"; };
+
+    // helperji
+    const toWei = (amt, dec) => BigInt(Math.round(Number(amt) * (10 ** Number(dec))));
+    const fmt   = (n,d=6)=>Number(n).toLocaleString(undefined,{maximumFractionDigits:d});
 
     let provider, signer, account, router, usdt;
 
@@ -137,35 +139,51 @@
     async function getQuote(){
       try{
         await ensureChain();
+
+        // poskrbi za router instanco
         if(!router){
           const s = await (new ethers.BrowserProvider(window.ethereum)).getSigner();
           router = new ethers.Contract(ROUTER, routerAbi, s);
         }
+
         const pay = $("pay").value;
-        const amt = parseFloat($("amt").value);
+        const amt = Number($("amt").value);
         if(!amt || amt<=0) throw new Error(t("err_amount"));
 
         let path, amountIn, sym, outDecimals = 18;
-        if(pay==="BNB"){
-          path=[WBNB, TOKEN];
-          amountIn=ethers.parseEther(String(amt));
-          sym="BNB";
+
+        if(pay === "BNB"){
+          path     = [WBNB, TOKEN];
+          amountIn = ethers.parseEther(String(amt));   // BigInt
+          sym      = "BNB";
         }else{
-          const s = await (new ethers.BrowserProvider(window.ethereum)).getSigner();
-          const d = await (new ethers.Contract(USDT, ["function decimals() view returns (uint8)"], s)).decimals();
-          path=[USDT, WBNB, TOKEN];
-          amountIn=toWei(amt, d);
-          sym="USDT";
+          // USDT -> WBNB -> TOKEN
+          const s  = await (new ethers.BrowserProvider(window.ethereum)).getSigner();
+          const d  = Number(await (new ethers.Contract(USDT, ["function decimals() view returns (uint8)"], s)).decimals());
+          path     = [USDT, WBNB, TOKEN];
+          amountIn = toWei(amt, d);                    // BigInt
+          sym      = "USDT";
         }
 
+        // amounts so BigInt – brez mešanja tipov
         let amounts;
-        try{ amounts = await router.getAmountsOut(amountIn, path); }
-        catch{ throw new Error(t("err_quote")); }
+        try{
+          amounts = await router.getAmountsOut(amountIn, path);
+        }catch{
+          throw new Error(t("err_quote"));
+        }
 
-        const out = amounts[amounts.length-1];
-        const sl = Math.max(0.1, parseFloat($("slip").value||"1"));
-        const minOut = out - (out * BigInt(Math.floor(sl*1000)) / 100000n);
-        $("q").innerHTML = t("quote_line", {amt, sym, out:Number(out)/1e18, min:Number(minOut)/1e18, sl});
+        const out = amounts[amounts.length-1];         // BigInt
+        const sl  = Math.max(0.1, parseFloat($("slip").value || "1"));
+        const minOut = out - (out * BigInt(Math.floor(sl*1000)) / 100000n); // vse v BigInt
+
+        $("q").innerHTML = t("quote_line", {
+          amt, sym,
+          out: Number(out)   / 1e18,
+          min: Number(minOut)/ 1e18,
+          sl
+        });
+
         return {pay, amountIn, minOut, path};
       }catch(e){ err(e.message||String(e)); throw e; }
     }
@@ -183,7 +201,10 @@
           const rc=await tx.wait(); ok(t("ok_tx",{hash:rc.hash}));
         }else{
           const allowance = await usdt.allowance(account, ROUTER);
-          if(allowance < amountIn){ ok(t("ok_approve")); const a=await usdt.approve(ROUTER, amountIn); await a.wait(); }
+          if(allowance < amountIn){
+            ok(t("ok_approve"));
+            const a=await usdt.approve(ROUTER, amountIn); await a.wait();
+          }
           const tx = await router.swapExactTokensForTokensSupportingFeeOnTransferTokens(
             amountIn, minOut, path, account, deadline
           );
@@ -195,7 +216,10 @@
 
     async function addTok(){
       try{
-        await window.ethereum.request({method:"wallet_watchAsset", params:{type:"ERC20", options:{address:TOKEN, symbol:".Onion", decimals:18}}});
+        await window.ethereum.request({
+          method:"wallet_watchAsset",
+          params:{type:"ERC20", options:{address:TOKEN, symbol:".Onion", decimals:18}}
+        });
       }catch(e){ err(e.message||String(e)); }
     }
 
@@ -228,11 +252,7 @@
     function t(key, vars){
       const lang = document.body.getAttribute("data-lang") || "en";
       let s = (L[lang] && L[lang][key]) ? L[lang][key] : key;
-      if (vars) {
-        for (const k in vars) {
-          s = s.replace(new RegExp("\\{" + k + "\\}", "g"), String(vars[k]));
-        }
-      }
+      if (vars) for (const k in vars) s = s.replace(new RegExp("\\{"+k+"\\}","g"), String(vars[k]));
       return s;
     }
 
