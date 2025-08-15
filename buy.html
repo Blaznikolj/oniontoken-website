@@ -5,24 +5,46 @@
   <meta name="viewport" content="width=device-width,initial-scale=1" />
   <title>Buy .Onion</title>
   <style>
-    html,body{margin:0;background:#0b0f17;color:#e6e8ec;font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif}
-    .wrap{max-width:720px;margin:40px auto;padding:24px;background:#111827;border:1px solid #1f2937;border-radius:16px}
-    .card{background:#0f1624;border:1px solid #1f2937;border-radius:12px;padding:16px;margin:16px 0}
+    :root{
+      --bg:#0b0f17;
+      --panel:#111827;
+      --panel-2:#0f1624;
+      --border:#1f2937;
+      --text:#e6e8ec;
+      --muted:#9aa4b2;
+      --field:#0b1220;
+
+      /* ACCENT – ista kot na indexu */
+      --accent:#27c193;
+      --accent-contrast:#08131a;
+    }
+    html,body{margin:0;background:var(--bg);color:var(--text);
+      font-family:Inter,system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif}
+    .wrap{max-width:720px;margin:40px auto;padding:24px;background:var(--panel);
+      border:1px solid var(--border);border-radius:16px}
+    .card{background:var(--panel-2);border:1px solid var(--border);
+      border-radius:12px;padding:16px;margin:16px 0}
     .row{display:flex;gap:12px;align-items:center}
     .row>*{flex:1}
-    label{display:block;font-size:14px;color:#9aa4b2;margin-bottom:8px}
-    input,select{width:100%;padding:12px 14px;border-radius:10px;border:1px solid #263248;background:#0b1220;color:#e6e8ec;font-size:16px}
+    label{display:block;font-size:14px;color:var(--muted);margin-bottom:8px}
+    select,input{width:100%;padding:12px 14px;border-radius:10px;border:1px solid #263248;
+      background:var(--field);color:var(--text);font-size:16px}
     button{cursor:pointer;padding:12px 16px;border:0;border-radius:10px;font-weight:700}
-    .primary{background:#27c193;color:#08131a}
+    .primary{background:var(--accent);color:var(--accent-contrast)}
     .primary:disabled{opacity:.6;cursor:not-allowed}
-    .secondary{background:#1f2937;color:#e6e8ec}
-    .muted{color:#9aa4b2;font-size:13px;display:none} /* skrit podnaslov */
-    .ok{color:#27c193;white-space:pre-line;font-size:13px;display:none}
+    .secondary{background:#1f2937;color:var(--text)}
+    .muted{color:var(--muted);font-size:13px}
+    .ok{color:var(--accent);white-space:pre-line;font-size:13px;display:none}
     .err{color:#ff6b6b;white-space:pre-line;font-size:13px;display:none}
     .lang{position:fixed;right:16px;top:16px;display:flex;gap:8px;z-index:10}
-    .lang button{background:#1f2937;color:#e6e8ec;border:0;border-radius:8px;padding:6px 10px;font-weight:700}
-    .lang button.active{background:#27c193;color:#08131a}
-    .pill{display:inline-block;padding:6px 10px;border-radius:999px;background:#1f2937;color:#e6e8ec;font-size:12px;font-weight:700}
+    .lang button{background:#1f2937;color:var(--text);border:0;border-radius:8px;
+      padding:6px 10px;font-weight:700}
+    .lang button.active{background:var(--accent);color:var(--accent-contrast)}
+    .pill{display:inline-block;padding:6px 10px;border-radius:999px;background:#1f2937;
+      color:var(--text);font-size:12px;font-weight:700}
+    /* hover/focus za accent gumbe */
+    .primary:hover{filter:brightness(1.05)}
+    .primary:active{transform:translateY(1px)}
   </style>
 </head>
 <body data-lang="en">
@@ -33,11 +55,12 @@
 
   <div class="wrap">
     <h1 id="tTitle">Buy .Onion</h1>
-    <p class="muted" id="tSub">PCS V2 Router • BNB → .Onion • addresses in lowercase.</p>
+    <p class="muted" id="tSub" style="display:none"></p> <!-- skrito podnaslovje -->
 
     <div class="card">
       <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
-        <div><span id="tNetwork">Network</span>: <b id="net">—</b> • <span id="tWallet">Wallet</span>: <b id="acct">—</b></div>
+        <div><span id="tNetwork">Network</span>: <b id="net">—</b> •
+            <span id="tWallet">Wallet</span>: <b id="acct">—</b></div>
         <span id="connType" class="pill">—</span>
       </div>
       <div class="row" style="margin-top:12px">
@@ -55,7 +78,7 @@
       <div class="row">
         <div>
           <label id="tPayWith">Pay with</label>
-          <input value="BNB" disabled />
+          <select id="pay" disabled><option selected>BNB</option></select>
         </div>
         <div>
           <label>Slippage (%)</label>
@@ -82,15 +105,13 @@
 
   <!-- Ethers v6 (UMD) -->
   <script src="https://cdn.jsdelivr.net/npm/ethers@6.13.1/dist/ethers.umd.min.js"></script>
-
   <script>
   (function(){
     // ==== CONFIG (BSC) ====
     const TOKEN  = "0xf95a185f32aea4ae5e944bbc0f6c72687e607b0a";
     const WBNB   = "0xbb4cdb9cbd36b01bd1cbaebf2de08d9173bc095c";
     const ROUTER = "0x10ed43c718714eb63d5aa57b78b54704e256024e";
-    const CHAIN_HEX = "0x38"; // BSC
-    const RPC_BSC   = "https://bsc-dataseed.binance.org";
+    const CHAIN  = "0x38"; // BSC
 
     const routerAbi = [
       "function getAmountsOut(uint256 amountIn, address[] calldata path) external view returns (uint256[] memory)",
@@ -104,127 +125,118 @@
 
     let provider, signer, account, router;
 
-    function setConnUI(type){
-      $("connType").textContent = type || "—";
-      const connected = !!type;
-      $("disconnect").disabled = !connected;
-      $("net").textContent = connected ? "BSC (56)" : "—";
-      if(!connected) $("acct").textContent = "—";
-    }
-    function clearState(){
-      provider = signer = account = router = undefined;
-      setConnUI(null);
-      $("q").style.display="none"; $("q").textContent = "—";
-      ok(""); $("status").style.display="none";
-      $("error").style.display="none";
-    }
-
-    async function ensureChain(eth){
-      const id = await eth.request({method:"eth_chainId"});
-      if(id!==CHAIN_HEX){
+    async function ensureChain(){
+      if(!window.ethereum){ err(t("err_nowallet")); throw new Error("No wallet"); }
+      const id = await window.ethereum.request({method:"eth_chainId"});
+      if(id!==CHAIN){
         try{
-          await eth.request({method:"wallet_switchEthereumChain", params:[{chainId:CHAIN_HEX}]});
+          await window.ethereum.request({method:"wallet_switchEthereumChain", params:[{chainId:CHAIN}]});
         }catch{
-          await eth.request({method:"wallet_addEthereumChain", params:[{
-            chainId:CHAIN_HEX, chainName:"BSC",
-            nativeCurrency:{name:"BNB",symbol:"BNB",decimals:18},
-            rpcUrls:[RPC_BSC], blockExplorerUrls:["https://bscscan.com/"]
+          await window.ethereum.request({method:"wallet_addEthereumChain", params:[{
+            chainId:CHAIN, chainName:"BSC", nativeCurrency:{name:"BNB",symbol:"BNB",decimals:18},
+            rpcUrls:["https://bsc-dataseed.binance.org/"], blockExplorerUrls:["https://bscscan.com/"]
           }]});
-          await eth.request({method:"wallet_switchEthereumChain", params:[{chainId:CHAIN_HEX}]});
+          await window.ethereum.request({method:"wallet_switchEthereumChain", params:[{chainId:CHAIN}]});
         }
       }
     }
 
     async function connect(){
       try{
-        const eth = window.ethereum;
-        if(!eth) throw new Error("Wallet not detected. Open this page in MetaMask/TrustWallet browser.");
-        await ensureChain(eth);
-        provider = new ethers.BrowserProvider(eth);
+        await ensureChain();
+        provider = new ethers.BrowserProvider(window.ethereum);
         await provider.send("eth_requestAccounts", []);
         signer   = await provider.getSigner();
         account  = await signer.getAddress();
         router   = new ethers.Contract(ROUTER, routerAbi, signer);
+        $("net").textContent="BSC (56)";
         $("acct").textContent=account.slice(0,6)+"…"+account.slice(-4);
-        setConnUI("Injected");
+        $("connType").textContent="Injected";
+        $("disconnect").disabled = false;
         ok(t("ok_connected"));
-        eth.on?.("accountsChanged", ()=>connect().catch(()=>{}));
-        eth.on?.("chainChanged",   ()=>connect().catch(()=>{}));
       }catch(e){ err(e.message||String(e)); }
     }
 
-    function getRouterEnsured(){
-      if(router) return router;
-      const eth = window.ethereum;
-      if(!eth) throw new Error(t("err_connect"));
-      const bp = new ethers.BrowserProvider(eth);
-      return bp.getSigner().then(s=> new ethers.Contract(ROUTER, routerAbi, s));
+    async function disconnect(){
+      provider = signer = account = router = undefined;
+      $("net").textContent="—"; $("acct").textContent="—"; $("connType").textContent="—";
+      $("disconnect").disabled = true;
+      ok(""); $("status").style.display="none";
+    }
+
+    async function getRouterEnsured(){
+      if(!router){
+        await ensureChain();
+        const s = await (new ethers.BrowserProvider(window.ethereum)).getSigner();
+        router = new ethers.Contract(ROUTER, routerAbi, s);
+      }
+      return router;
     }
 
     async function getQuote(){
       try{
-        const r = router || await getRouterEnsured();
+        const r = await getRouterEnsured();
         const amt = parseFloat($("amt").value);
         if(!amt || amt<=0) throw new Error(t("err_amount"));
+
         const path=[WBNB, TOKEN];
         const amountIn=ethers.parseEther(String(amt));
+
         let amounts;
         try{ amounts = await r.getAmountsOut(amountIn, path); }
         catch{ throw new Error(t("err_quote")); }
+
         const out = amounts[amounts.length-1];
         const sl = Math.max(0.1, parseFloat($("slip").value||"1"));
         const minOut = out - (out * BigInt(Math.floor(sl*1000)) / 100000n);
-        $("q").style.display="block";
-        $("q").innerHTML = t("quote_line", {amt, out:Number(out)/1e18, min:Number(minOut)/1e18, sl});
+        $("q").innerHTML =
+          t("quote_line", {amt, out:Number(out)/1e18, min:Number(minOut)/1e18, sl});
         return {amountIn, minOut, path};
       }catch(e){ err(e.message||String(e)); throw e; }
     }
 
     async function buy(){
       try{
-        if(!signer) throw new Error(t("err_connect"));
+        if(!signer) await connect();
         const {amountIn, minOut, path} = await getQuote();
         const deadline = Math.floor(Date.now()/1000)+15*60;
+
         const tx = await router.swapExactETHForTokensSupportingFeeOnTransferTokens(
           minOut, path, account, deadline, {value:amountIn}
         );
         ok(t("ok_buying"));
-        const rc=await tx.wait();
-        ok(t("ok_tx",{hash:rc.hash}));
+        const rc=await tx.wait(); ok(t("ok_tx",{hash:rc.hash}));
       }catch(e){ err(e.message||String(e)); }
     }
 
     async function addTok(){
       try{
-        const eth = window.ethereum;
-        if(!eth) throw new Error(t("err_connect"));
-        await eth.request({method:"wallet_watchAsset", params:{type:"ERC20", options:{address:TOKEN, symbol:".Onion", decimals:18}}});
+        if(!window.ethereum) throw new Error(t("err_nowallet"));
+        await window.ethereum.request({method:"wallet_watchAsset", params:{
+          type:"ERC20", options:{address:TOKEN, symbol:".Onion", decimals:18}
+        }});
       }catch(e){ err(e.message||String(e)); }
     }
-
-    function disconnect(){ clearState(); }
 
     // ---- i18n ----
     const L = {
       en:{title:"Buy .Onion",
-          sub:"PCS V2 Router • BNB → .Onion • addresses in lowercase.",
           network:"Network", wallet:"Wallet", paywith:"Pay with", amount:"Amount",
           btn_quote:"Quote", btn_buy:"Buy",
           ok_connected:"Wallet connected.",
           err_amount:"Enter an amount.",
           err_quote:"Quote failed (no path on PCS V2 or empty reserves).",
-          err_connect:"Please connect a wallet first.",
+          err_nowallet:"Wallet not detected. Open this page in MetaMask/TrustWallet browser.",
           ok_buying:"Processing purchase…",
           ok_tx:"Success! Tx: https://bscscan.com/tx/{hash}",
           quote_line:"Pay: <b>{amt}</b> BNB<br>Receive ~ <b>{out}</b> .Onion<br>MinOut ({sl}%): <b>{min}</b>"},
       si:{title:"Kupi .Onion",
-          sub:"PCS V2 Router • BNB → .Onion • naslovi v lowercase.",
           network:"Omrežje", wallet:"Denarnica", paywith:"Plačilo z", amount:"Znesek",
           btn_quote:"Kotacija", btn_buy:"Kupi",
           ok_connected:"Denarnica povezana.",
           err_amount:"Vnesi znesek.",
           err_quote:"Kotacija ni uspela (ni poti na PCS V2 ali prazne rezerve).",
-          err_connect:"Najprej poveži denarnico.",
+          err_nowallet:"Denarnica ni zaznana. Odpri stran v brskalniku MetaMask/TrustWallet.",
           ok_buying:"Nakup v teku …",
           ok_tx:"Uspeh! Tx: https://bscscan.com/tx/{hash}",
           quote_line:"Plačilo: <b>{amt}</b> BNB<br>Prejmeš približno: <b>{out}</b> .Onion<br>MinOut ({sl}%): <b>{min}</b>"}
@@ -238,7 +250,6 @@
     function applyLang(lang){
       document.body.setAttribute("data-lang", lang);
       $("tTitle").textContent = t("title");
-      $("tSub").textContent   = t("sub");
       $("tNetwork").textContent = t("network");
       $("tWallet").textContent  = t("wallet");
       $("tPayWith").textContent = t("paywith");
