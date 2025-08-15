@@ -4,6 +4,7 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
   <title>Buy .Onion</title>
+
   <style>
     html,body{margin:0;background:#0b0f17;color:#e6e8ec;font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif}
     .wrap{max-width:720px;margin:40px auto;padding:24px;background:#111827;border:1px solid #1f2937;border-radius:16px}
@@ -11,12 +12,13 @@
     .row{display:flex;gap:12px;align-items:center}
     .row>*{flex:1}
     label{display:block;font-size:14px;color:#9aa4b2;margin-bottom:8px}
-    select,input{width:100%;padding:12px 14px;border-radius:10px;border:1px solid #263248;background:#0b1220;color:#e6e8ec;font-size:16px}
+    input,select,button{font:inherit}
+    input,select{width:100%;padding:12px 14px;border-radius:10px;border:1px solid #263248;background:#0b1220;color:#e6e8ec;font-size:16px}
     button{cursor:pointer;padding:12px 16px;border:0;border-radius:10px;font-weight:700}
     .primary{background:#27c193;color:#08131a}
     .primary:disabled{opacity:.6;cursor:not-allowed}
     .secondary{background:#1f2937;color:#e6e8ec}
-    .muted{color:#9aa4b2;font-size:13px;display:none}
+    .muted{color:#9aa4b2;font-size:13px;display:none} /* skrito podnaslovje */
     .ok{color:#27c193;white-space:pre-line;font-size:13px;display:none}
     .err{color:#ff6b6b;white-space:pre-line;font-size:13px;display:none}
     .lang{position:fixed;right:16px;top:16px;display:flex;gap:8px;z-index:10}
@@ -24,10 +26,15 @@
     .lang button.active{background:#27c193;color:#08131a}
     .pill{display:inline-block;padding:6px 10px;border-radius:999px;background:#1f2937;color:#e6e8ec;font-size:12px;font-weight:700}
   </style>
-  <!-- Ethers v6 (UMD) MUST load before our script -->
+
+  <!-- Ethers v6 (UMD) -->
   <script src="https://cdn.jsdelivr.net/npm/ethers@6.13.1/dist/ethers.umd.min.js"></script>
-  <!-- WalletConnect Ethereum Provider v2 (UMD) -->
-  <script src="https://unpkg.com/@walletconnect/ethereum-provider@2.11.2/dist/umd/index.min.js"></script>
+
+  <!-- WalletConnect Ethereum Provider v2 (fallback: unpkg -> jsDelivr) -->
+  <script
+    src="https://unpkg.com/@walletconnect/ethereum-provider@2.11.2/dist/umd/index.min.js"
+    onerror="(function(){var s=document.createElement('script');s.src='https://cdn.jsdelivr.net/npm/@walletconnect/ethereum-provider@2.11.2/dist/umd/index.min.js';document.head.appendChild(s);}())">
+  </script>
 </head>
 <body data-lang="en">
   <div class="lang">
@@ -60,7 +67,7 @@
       <div class="row">
         <div>
           <label id="tPayWith">Pay with</label>
-          <select id="pay" disabled><option selected>BNB</option></select>
+          <input value="BNB" disabled />
         </div>
         <div>
           <label>Slippage (%)</label>
@@ -87,18 +94,21 @@
 
   <script>
   (function(){
-    // ==== CONFIG (BSC) ====
+    // ==== CONFIG ====
     const TOKEN  = "0xf95a185f32aea4ae5e944bbc0f6c72687e607b0a";
     const WBNB   = "0xbb4cdb9cbd36b01bd1cbaebf2de08d9173bc095c";
     const ROUTER = "0x10ed43c718714eb63d5aa57b78b54704e256024e";
     const CHAIN_HEX = "0x38"; // BSC
     const CHAIN_ID  = 56;
     const RPC_BSC   = "https://bsc-dataseed.binance.org";
-    const WC_PROJECT_ID = "5fd10d829d57b05296f4846c5ce385b8";
+    const WC_PROJECT_ID = "5fd10d829d57b05296f4846c5ce385b8"; // tvoj WalletConnect project ID
 
     const routerAbi = [
       "function getAmountsOut(uint256 amountIn, address[] calldata path) external view returns (uint256[] memory)",
       "function swapExactETHForTokensSupportingFeeOnTransferTokens(uint amountOutMin, address[] calldata path, address to, uint deadline) external payable"
+    ];
+    const erc20Abi = [
+      "function decimals() view returns (uint8)"
     ];
 
     const $ = (id)=>document.getElementById(id);
@@ -116,8 +126,9 @@
     }
     function clearState(){
       provider = signer = account = router = undefined;
-      setConnUI(null); $("q").style.display="none"; $("q").textContent = "—";
-      $("status").style.display="none"; $("error").style.display="none";
+      setConnUI(null);
+      $("q").style.display = "none";
+      ok(""); $("status").style.display="none";
     }
 
     async function ensureChain(eth){
@@ -136,39 +147,31 @@
       }
     }
 
-    async function afterConnect(kind, ethLike){
-      const bp = new ethers.BrowserProvider(ethLike);
-      signer   = await bp.getSigner();
-      provider = bp;
-      router   = new ethers.Contract(ROUTER, routerAbi, signer);
-      account  = await signer.getAddress();
-      $("acct").textContent = account.slice(0,6)+"…"+account.slice(-4);
-      setConnUI(kind);
-      ok(t("ok_connected"));
-    }
-
-    // --- Injected (MetaMask/Trust/OKX/…) ---
+    // Injected
     async function connectInjected(){
       try{
         const eth = window.ethereum;
-        if(!eth) throw new Error("Wallet not detected.");
+        if(!eth) throw new Error(t("err_nowallet"));
         await ensureChain(eth);
-        await new ethers.BrowserProvider(eth).send("eth_requestAccounts", []);
-        await afterConnect("Injected", eth);
+        provider = new ethers.BrowserProvider(eth);
+        await provider.send("eth_requestAccounts", []);
+        signer   = await provider.getSigner();
+        router   = new ethers.Contract(ROUTER, routerAbi, signer);
+        account  = await signer.getAddress();
+        $("acct").textContent=account.slice(0,6)+"…"+account.slice(-4);
+        setConnUI("Injected");
+        ok(t("ok_connected"));
         eth.on?.("accountsChanged", ()=>connectInjected().catch(()=>{}));
         eth.on?.("chainChanged",   ()=>connectInjected().catch(()=>{}));
       }catch(e){ err(e.message||String(e)); }
     }
 
-    // --- WalletConnect ---
-    function wcGlobal(){
-      return window.WalletConnectEthereumProvider || window.WalletConnectProvider || null;
-    }
+    // WalletConnect (QR)
     async function connectWalletConnect(){
       try{
-        const WCP = wcGlobal();
-        if(!WCP){ throw new Error("WalletConnect SDK not loaded."); }
-        const p = await WCP.init({
+        const WCEP = window.WalletConnectEthereumProvider || (window.wc && window.wc.WalletConnectEthereumProvider);
+        if(!WCEP || !WCEP.default){ throw new Error("WalletConnect SDK not loaded."); }
+        wcProvider = await WCEP.default.init({
           projectId: WC_PROJECT_ID,
           chains: [CHAIN_ID],
           methods: ["eth_sendTransaction","personal_sign","eth_signTypedData","eth_accounts","eth_requestAccounts"],
@@ -176,75 +179,53 @@
           showQrModal: true,
           rpcMap: { [CHAIN_ID]: RPC_BSC }
         });
-        await p.enable();
-        wcProvider = p;
-        try{ await ensureChain(wcProvider); }catch(_){}
-        await afterConnect("WalletConnect", wcProvider);
+        await wcProvider.enable();
+        try { await ensureChain(wcProvider); } catch(_){}
+        provider = new ethers.BrowserProvider(wcProvider);
+        signer   = await provider.getSigner();
+        router   = new ethers.Contract(ROUTER, routerAbi, signer);
+        account  = await signer.getAddress();
+        $("acct").textContent=account.slice(0,6)+"…"+account.slice(-4);
+        setConnUI("WalletConnect");
+        ok(t("ok_connected"));
         wcProvider.on?.("disconnect", clearState);
+        wcProvider.on?.("accountsChanged", ()=>connectWalletConnect().catch(()=>{}));
+        wcProvider.on?.("chainChanged",   ()=>connectWalletConnect().catch(()=>{}));
       }catch(e){ err(e.message||String(e)); }
     }
-    async function tryAutoWalletConnect(){
-      try{
-        const WCP = wcGlobal(); if(!WCP) return;
-        const p = await WCP.init({
-          projectId: WC_PROJECT_ID,
-          chains: [CHAIN_ID],
-          showQrModal: false,
-          rpcMap: { [CHAIN_ID]: RPC_BSC }
-        });
-        await p.enable(); // uspe le, če obstaja seja
-        wcProvider = p;
-        try{ await ensureChain(wcProvider); }catch(_){}
-        await afterConnect("WalletConnect", wcProvider);
-        wcProvider.on?.("disconnect", clearState);
-      }catch(_){/* brez obstoječe seje – nič */}
-    }
+
     async function disconnect(){
-      try{ await wcProvider?.disconnect?.(); }catch(_){}
-      clearState();
+      try{ await wcProvider?.disconnect?.(); }finally{ clearState(); }
     }
 
-    async function getRouter(){
+    async function getRouterEnsured(){
       if(!router){
         const eth = (provider && provider.provider) || window.ethereum || wcProvider;
         if(!eth) throw new Error(t("err_connect"));
-        await ensureChain(eth);
         const s = await (new ethers.BrowserProvider(eth)).getSigner();
         router = new ethers.Contract(ROUTER, routerAbi, s);
       }
       return router;
     }
 
-    function parseNum(v){
-      if(typeof v!=="string") v = String(v??"");
-      v = v.replace(",", ".");            // podpora EU vejici
-      const n = parseFloat(v);
-      if(!isFinite(n) || n<=0) return null;
-      return n;
-    }
-
+    // Quote samo za BNB -> .Onion
     async function getQuote(){
       try{
-        const r = await getRouter();
-        const amtNum = parseNum($("amt").value);
-        if(!amtNum) throw new Error(t("err_amount"));
-        const amountIn = ethers.parseEther(String(amtNum));
-        const path = [WBNB, TOKEN];
+        const r = await getRouterEnsured();
+        const amt = parseFloat($("amt").value);
+        if(!amt || amt<=0) throw new Error(t("err_amount"));
+        const amountIn = ethers.parseEther(String(amt)); // BigInt
+        const path=[WBNB, TOKEN];
 
         let amounts;
         try{ amounts = await r.getAmountsOut(amountIn, path); }
         catch{ throw new Error(t("err_quote")); }
 
         const out = amounts[amounts.length-1];
-        const sl = Math.max(0.1, parseFloat(($("slip").value||"1").toString().replace(",",".")));
+        const sl = Math.max(0.1, parseFloat($("slip").value||"1"));
         const minOut = out - (out * BigInt(Math.floor(sl*1000)) / 100000n);
-
         $("q").style.display="block";
-        $("q").innerHTML = t("quote_line", {
-          amt: amtNum, sym: "BNB",
-          out: Number(out)/1e18,
-          min: Number(minOut)/1e18, sl
-        });
+        $("q").innerHTML = t("quote_line", {amt, out:Number(out)/1e18, min:Number(minOut)/1e18, sl});
         return { amountIn, minOut, path };
       }catch(e){ err(e.message||String(e)); throw e; }
     }
@@ -252,26 +233,21 @@
     async function buy(){
       try{
         if(!signer) throw new Error(t("err_connect"));
-        const { amountIn, minOut, path } = await getQuote();
+        const {amountIn, minOut, path} = await getQuote();
         const deadline = Math.floor(Date.now()/1000)+15*60;
-
         const tx = await router.swapExactETHForTokensSupportingFeeOnTransferTokens(
-          minOut, path, account, deadline, { value: amountIn }
+          minOut, path, account, deadline, {value:amountIn}
         );
         ok(t("ok_buying"));
-        const rc = await tx.wait();
-        ok(t("ok_tx",{hash:rc.hash}));
+        const rc=await tx.wait(); ok(t("ok_tx",{hash:rc.hash}));
       }catch(e){ err(e.message||String(e)); }
     }
 
     async function addTok(){
       try{
         const eth = (provider && provider.provider) || window.ethereum || wcProvider;
-        if(!eth || !eth.request) throw new Error(t("err_connect"));
-        await eth.request({
-          method:"wallet_watchAsset",
-          params:{ type:"ERC20", options:{ address:TOKEN, symbol:".Onion", decimals:18 } }
-        });
+        if(!eth) throw new Error(t("err_connect"));
+        await eth.request({method:"wallet_watchAsset", params:{type:"ERC20", options:{address:TOKEN, symbol:".Onion", decimals:18}}});
       }catch(e){ err(e.message||String(e)); }
     }
 
@@ -285,9 +261,10 @@
           err_amount:"Enter an amount.",
           err_quote:"Quote failed (no path on PCS V2 or empty reserves).",
           err_connect:"Please connect a wallet first.",
+          err_nowallet:"Wallet not detected.",
           ok_buying:"Processing purchase…",
           ok_tx:"Success! Tx: https://bscscan.com/tx/{hash}",
-          quote_line:"Pay: <b>{amt}</b> {sym}<br>Receive ~ <b>{out}</b> .Onion<br>MinOut ({sl}%): <b>{min}</b>"},
+          quote_line:"Pay: <b>{amt}</b> BNB<br>Receive ~ <b>{out}</b> .Onion<br>MinOut ({sl}%): <b>{min}</b>"},
       si:{title:"Kupi .Onion",
           sub:"PCS V2 Router • BNB (WBNB→.Onion) • naslovi v lowercase.",
           network:"Omrežje", wallet:"Denarnica", paywith:"Plačilo z", amount:"Znesek",
@@ -296,9 +273,10 @@
           err_amount:"Vnesi znesek.",
           err_quote:"Kotacija ni uspela (ni poti na PCS V2 ali prazne rezerve).",
           err_connect:"Najprej poveži denarnico.",
+          err_nowallet:"Denarnica ni zaznana.",
           ok_buying:"Nakup v teku …",
           ok_tx:"Uspeh! Tx: https://bscscan.com/tx/{hash}",
-          quote_line:"Plačilo: <b>{amt}</b> {sym}<br>Prejmeš približno: <b>{out}</b> .Onion<br>MinOut ({sl}%): <b>{min}</b>"}
+          quote_line:"Plačilo: <b>{amt}</b> BNB<br>Prejmeš približno: <b>{out}</b> .Onion<br>MinOut ({sl}%): <b>{min}</b>"}
     };
     function t(key, vars){
       const lang = document.body.getAttribute("data-lang") || "en";
@@ -320,8 +298,8 @@
       $("bSI").classList.toggle("active", lang==="si");
     }
 
-    // Events + auto‑reconnect
-    window.addEventListener("DOMContentLoaded", async ()=>{
+    // Events
+    window.addEventListener("DOMContentLoaded", ()=>{
       applyLang("en");
       $("bEN").addEventListener("click", ()=>applyLang("en"));
       $("bSI").addEventListener("click", ()=>applyLang("si"));
@@ -331,8 +309,6 @@
       $("quote").addEventListener("click", getQuote);
       $("buy").addEventListener("click", buy);
       $("addTok").addEventListener("click", addTok);
-
-      tryAutoWalletConnect(); // če obstaja WC seja, bo povezalo brez QR
     });
   })();
   </script>
