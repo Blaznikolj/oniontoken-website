@@ -11,7 +11,7 @@
     .row{display:flex;gap:12px;align-items:center}
     .row>*{flex:1}
     label{display:block;font-size:14px;color:#9aa4b2;margin-bottom:8px}
-    select,input{width:100%;padding:12px 14px;border-radius:10px;border:1px solid #263248;background:#0b1220;color:#e6e8ec;font-size:16px}
+    input,select{width:100%;padding:12px 14px;border-radius:10px;border:1px solid #263248;background:#0b1220;color:#e6e8ec;font-size:16px}
     button{cursor:pointer;padding:12px 16px;border:0;border-radius:10px;font-weight:700}
     .primary{background:#27c193;color:#08131a}
     .primary:disabled{opacity:.6;cursor:not-allowed}
@@ -26,6 +26,7 @@
   </style>
 </head>
 <body data-lang="en">
+  <!-- language switch -->
   <div class="lang">
     <button id="bEN" class="active">GB EN</button>
     <button id="bSI">SI SI</button>
@@ -33,7 +34,7 @@
 
   <div class="wrap">
     <h1 id="tTitle">Buy .Onion</h1>
-    <p class="muted" id="tSub">PCS V2 Router • BNB or USDT (multi‑hop USDT→WBNB→.Onion) • addresses in lowercase.</p>
+    <p class="muted" id="tSub">PCS V2 Router • BNB (WBNB→.Onion) • addresses in lowercase.</p>
 
     <div class="card">
       <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
@@ -41,22 +42,22 @@
         <span id="connType" class="pill">—</span>
       </div>
       <div class="row" style="margin-top:12px">
-        <button id="connect" class="primary">Connect wallet</button>
-        <button id="connectWc" class="secondary" disabled title="Loading WalletConnect…">WalletConnect</button>
+        <button id="connect"    class="primary">Connect wallet</button>
+        <button id="connectWc"  class="secondary">WalletConnect</button>
       </div>
       <div class="row" style="margin-top:8px">
-        <button id="addTok" class="secondary">Add .Onion to wallet</button>
+        <button id="addTok"     class="secondary">Add .Onion to wallet</button>
         <button id="disconnect" class="secondary" disabled>Disconnect</button>
       </div>
       <div id="status" class="ok"></div>
-      <div id="error" class="err"></div>
+      <div id="error"  class="err"></div>
     </div>
 
     <div class="card">
       <div class="row">
         <div>
           <label id="tPayWith">Pay with</label>
-          <select id="pay"><option>BNB</option><option>USDT</option></select>
+          <input value="BNB" disabled />
         </div>
         <div>
           <label>Slippage (%)</label>
@@ -67,13 +68,13 @@
       <div class="row" style="margin-top:12px">
         <div>
           <label id="tAmount">Amount</label>
-          <input id="amt" type="number" step="0.0001" placeholder="e.g. 0.02 (BNB) or 10 (USDT)" />
+          <input id="amt" type="number" step="0.0001" placeholder="e.g. 0.02 (BNB)" />
         </div>
         <div>
           <label>&nbsp;</label>
           <div class="row">
             <button id="quote" class="secondary">Quote</button>
-            <button id="buy" class="primary">Buy</button>
+            <button id="buy"   class="primary">Buy</button>
           </div>
         </div>
       </div>
@@ -83,46 +84,30 @@
 
   <!-- Ethers v6 (UMD) -->
   <script src="https://cdn.jsdelivr.net/npm/ethers@6.13.1/dist/ethers.umd.min.js"></script>
-  <!-- WalletConnect / Reown Ethereum Provider v2 (UMD) -->
+  <!-- WalletConnect v2 (UMD) -->
   <script src="https://unpkg.com/@walletconnect/ethereum-provider@2.11.2/dist/umd/index.min.js"></script>
 
   <script>
   (function(){
-    // ==== CONFIG ====
-    const TOKEN  = "0xf95a185f32aea4ae5e944bbc0f6c72687e607b0a";
-    const WBNB   = "0xbb4cdb9cbd36b01bd1cbaebf2de08d9173bc095c";
-    const USDT   = "0x55d398326f99059ff775485246999027b3197955";
-    const ROUTER = "0x10ed43c718714eb63d5aa57b78b54704e256024e";
-    const CHAIN_HEX = "0x38";  // BSC
+    // ===== CONFIG =====
+    const TOKEN   = "0xf95a185f32aea4ae5e944bbc0f6c72687e607b0a";
+    const WBNB    = "0xbb4cdb9cbd36b01bd1cbaebf2de08d9173bc095c";
+    const ROUTER  = "0x10ed43c718714eb63d5aa57b78b54704e256024e"; // Pancake v2
+    const CHAIN_HEX = "0x38"; // BSC
     const CHAIN_ID  = 56;
     const RPC_BSC   = "https://bsc-dataseed.binance.org";
     const WC_PROJECT_ID = "5fd10d829d57b05296f4846c5ce385b8";
 
-    // ABIs
     const routerAbi = [
       "function getAmountsOut(uint256 amountIn, address[] calldata path) external view returns (uint256[] memory)",
-      "function swapExactETHForTokensSupportingFeeOnTransferTokens(uint amountOutMin, address[] calldata path, address to, uint deadline) external payable",
-      "function swapExactTokensForTokensSupportingFeeOnTransferTokens(uint amountIn, uint amountOutMin, address[] calldata path, address to, uint deadline) external"
-    ];
-    const erc20Abi = [
-      "function decimals() view returns (uint8)",
-      "function allowance(address owner, address spender) view returns (uint256)",
-      "function approve(address spender, uint256 amount) external returns (bool)"
+      "function swapExactETHForTokensSupportingFeeOnTransferTokens(uint amountOutMin, address[] calldata path, address to, uint deadline) external payable"
     ];
 
-    // Helpers
-    const $  = (id)=>document.getElementById(id);
-    const ok = (t)=>{ $("status").style.display="block"; $("status").textContent=t; $("error").style.display="none"; };
-    const err= (t)=>{ $("error").style.display="block"; $("error").textContent=t; $("status").style.display="none"; };
-    const toWei = (amt, dec) => {
-      const n = Number(amt);
-      if (!isFinite(n) || n <= 0) return 0n;
-      const f = 10 ** Math.min(dec, 18);
-      return BigInt(Math.round(n * f));
-    };
+    const $ = (id)=>document.getElementById(id);
+    const ok  = (t)=>{ $("status").style.display="block"; $("status").textContent=t; $("error").style.display="none"; };
+    const err = (t)=>{ $("error").style.display="block"; $("error").textContent=t; $("status").style.display="none"; };
 
-    let provider, signer, account, router, usdt, wcProvider;
-    let connecting = false;
+    let provider, signer, account, router, wcProvider, connecting=false;
 
     function setConnUI(type){
       $("connType").textContent = type || "—";
@@ -132,12 +117,10 @@
       if(!connected) $("acct").textContent = "—";
     }
     function clearState(){
-      provider = signer = account = router = usdt = undefined;
+      provider = signer = account = router = undefined;
       setConnUI(null);
-      $("q").style.display = "none";
-      $("q").textContent = "—";
-      $("status").style.display="none";
-      $("error").style.display="none";
+      $("q").style.display="none";
+      ok(""); $("status").style.display="none";
     }
 
     async function ensureChain(eth){
@@ -156,132 +139,106 @@
       }
     }
 
-    // ---- Injected (MetaMask…) ----
     async function connectInjected(){
-      if(connecting) return;
-      connecting = true; $("connect").disabled = true;
+      if(connecting) return; connecting=true; $("connect").disabled=true;
       try{
         const eth = window.ethereum;
         if(!eth) throw new Error("Wallet not detected.");
         await ensureChain(eth);
-        const bp = new ethers.BrowserProvider(eth);
-        await bp.send("eth_requestAccounts", []);
-        provider = bp;
+        provider = new ethers.BrowserProvider(eth);
+        await provider.send("eth_requestAccounts", []);
         signer   = await provider.getSigner();
-        afterConnect("Injected", eth);
+        account  = await signer.getAddress();
+        router   = new ethers.Contract(ROUTER, routerAbi, signer);
+        $("acct").textContent=account.slice(0,6)+"…"+account.slice(-4);
+        setConnUI("Injected");
+        ok(t("ok_connected"));
+        eth.on?.("accountsChanged", ()=>connectInjected().catch(()=>{}));
+        eth.on?.("chainChanged",   ()=>connectInjected().catch(()=>{}));
       }catch(e){ err(e.message||String(e)); }
-      finally{ connecting = false; $("connect").disabled = false; }
+      finally{ connecting=false; $("connect").disabled=false; }
     }
 
-    // ---- WalletConnect (QR) ----
-    function getWcCtor(){
-      // UMD lahko izpostavi različna imena; poiščemo katerokoli
-      return (window.WalletConnectEthereumProvider && window.WalletConnectEthereumProvider.default)
-          || window.WalletConnectEthereumProvider
-          || (window.EthereumProvider && window.EthereumProvider.default)
-          || window.EthereumProvider;
+    function getWcGlobal(){
+      return window.WalletConnectEthereumProvider || window.walletconnect?.ethereumProvider || null;
     }
 
     async function connectWalletConnect(){
       try{
-        const WC = getWcCtor();
+        const WC = getWcGlobal();
         if(!WC) throw new Error("WalletConnect SDK not loaded.");
-        if(!WC_PROJECT_ID) throw new Error("Missing WalletConnect Project ID.");
-        // v2 API: .init(...)
         wcProvider = await WC.init({
           projectId: WC_PROJECT_ID,
           chains: [CHAIN_ID],
-          methods: ["eth_sendTransaction","personal_sign","eth_signTypedData","eth_accounts","eth_requestAccounts"],
-          optionalMethods: ["wallet_switchEthereumChain","wallet_addEthereumChain"],
           showQrModal: true,
-          rpcMap: { [CHAIN_ID]: RPC_BSC }
+          rpcMap: { [CHAIN_ID]: RPC_BSC },
+          methods: ["eth_requestAccounts","eth_sendTransaction","personal_sign"],
+          optionalMethods:["wallet_switchEthereumChain","wallet_addEthereumChain"]
         });
         await wcProvider.enable();
-        try{ await ensureChain(wcProvider); }catch(_){}
+        try { await ensureChain(wcProvider); } catch(_){}
         provider = new ethers.BrowserProvider(wcProvider);
         signer   = await provider.getSigner();
-        bindWcEvents();
-        afterConnect("WalletConnect", wcProvider);
+        account  = await signer.getAddress();
+        router   = new ethers.Contract(ROUTER, routerAbi, signer);
+        $("acct").textContent=account.slice(0,6)+"…"+account.slice(-4);
+        setConnUI("WalletConnect");
+        ok(t("ok_connected"));
+        wcProvider.on?.("disconnect", clearState);
+        wcProvider.on?.("accountsChanged", ()=>connectWalletConnect().catch(()=>{}));
+        wcProvider.on?.("chainChanged",   ()=>connectWalletConnect().catch(()=>{}));
       }catch(e){ err(e.message||String(e)); }
     }
 
-    // Auto-reconnect brez QR, če obstaja seja
     async function tryAutoWalletConnect(){
       try{
-        const WC = getWcCtor();
-        if(!WC || !WC_PROJECT_ID) return;
+        const WC = getWcGlobal(); if(!WC) return;
         const p = await WC.init({
           projectId: WC_PROJECT_ID,
           chains: [CHAIN_ID],
-          methods: ["eth_sendTransaction","personal_sign","eth_signTypedData","eth_accounts","eth_requestAccounts"],
-          optionalMethods: ["wallet_switchEthereumChain","wallet_addEthereumChain"],
           showQrModal: false,
-          rpcMap: { [CHAIN_ID]: RPC_BSC }
+          rpcMap: { [CHAIN_ID]: RPC_BSC },
+          methods:["eth_requestAccounts"],
+          optionalMethods:["wallet_switchEthereumChain","wallet_addEthereumChain"]
         });
-        await p.enable();          // uspe le, če obstaja prejšnja seja
+        await p.enable();             // uspe le, če seja že obstaja
         wcProvider = p;
-        try{ await ensureChain(wcProvider); }catch(_){}
+        try { await ensureChain(wcProvider); } catch(_){}
         provider = new ethers.BrowserProvider(wcProvider);
         signer   = await provider.getSigner();
-        bindWcEvents();
-        afterConnect("WalletConnect", wcProvider);
-      }catch(_ignored){}
-    }
-
-    function bindWcEvents(){
-      wcProvider?.on?.("disconnect", clearState);
-      wcProvider?.on?.("accountsChanged", async ()=>afterConnect("WalletConnect", wcProvider));
-      wcProvider?.on?.("chainChanged",   async ()=>afterConnect("WalletConnect", wcProvider));
-    }
-
-    async function afterConnect(kind, eth){
-      try{
-        account  = await (await provider.getSigner()).getAddress();
-        router   = new ethers.Contract(ROUTER, routerAbi, await provider.getSigner());
-        usdt     = new ethers.Contract(USDT, erc20Abi, await provider.getSigner());
+        account  = await signer.getAddress();
+        router   = new ethers.Contract(ROUTER, routerAbi, signer);
         $("acct").textContent=account.slice(0,6)+"…"+account.slice(-4);
-        setConnUI(kind);
+        setConnUI("WalletConnect");
         ok(t("ok_connected"));
-        // poslušaj spremembe pri injected
-        eth?.on?.("accountsChanged", async ()=>{ if(kind==="Injected") try{ await connectInjected(); }catch{} });
-        eth?.on?.("chainChanged",   async ()=>{ if(kind==="Injected") try{ await connectInjected(); }catch{} });
-      }catch(e){ err(e.message||String(e)); }
+        wcProvider.on?.("disconnect", clearState);
+        wcProvider.on?.("accountsChanged", ()=>connectWalletConnect().catch(()=>{}));
+        wcProvider.on?.("chainChanged",   ()=>connectWalletConnect().catch(()=>{}));
+      }catch(_){}
     }
 
     async function disconnect(){
-      try{ if(wcProvider){ await wcProvider.disconnect?.(); } }
-      finally{ clearState(); }
+      try{ await wcProvider?.disconnect?.(); } finally { clearState(); }
     }
 
     async function getRouterEnsured(){
-      if(!router){
-        const eth = (provider && provider.provider) || window.ethereum || wcProvider;
-        if(!eth) throw new Error(t("err_connect"));
-        const s = await (new ethers.BrowserProvider(eth)).getSigner();
-        router = new ethers.Contract(ROUTER, routerAbi, s);
-      }
+      if(router) return router;
+      const eth = (provider && provider.provider) || window.ethereum || wcProvider;
+      if(!eth) throw new Error(t("err_connect"));
+      const s = await (new ethers.BrowserProvider(eth)).getSigner();
+      router  = new ethers.Contract(ROUTER, routerAbi, s);
+      signer  = s;
+      account = await s.getAddress();
       return router;
     }
 
     async function getQuote(){
       try{
         const r = await getRouterEnsured();
-        const pay = $("pay").value;
         const amt = parseFloat($("amt").value);
         if(!amt || amt<=0) throw new Error(t("err_amount"));
-
-        let path, amountIn, sym;
-        if(pay==="BNB"){
-          path=[WBNB, TOKEN];
-          amountIn=ethers.parseEther(String(amt));
-          sym="BNB";
-        }else{
-          // USDT decimals
-          const d = (typeof usdt?.decimals === "function") ? await usdt.decimals() : 18;
-          path=[USDT, WBNB, TOKEN];
-          amountIn=toWei(amt, d);
-          sym="USDT";
-        }
+        const amountIn = ethers.parseEther(String(amt));
+        const path = [WBNB, TOKEN];
 
         let amounts;
         try{ amounts = await r.getAmountsOut(amountIn, path); }
@@ -290,40 +247,31 @@
         const out = amounts[amounts.length-1];
         const sl = Math.max(0.1, parseFloat($("slip").value||"1"));
         const minOut = out - (out * BigInt(Math.floor(sl*1000)) / 100000n);
+
         $("q").style.display="block";
-        $("q").innerHTML = t("quote_line", {amt, sym, out:Number(out)/1e18, min:Number(minOut)/1e18, sl});
-        return {pay, amountIn, minOut, path};
+        $("q").innerHTML = t("quote_line_bnb", {amt, out:Number(out)/1e18, min:Number(minOut)/1e18, sl});
+        return { amountIn, minOut, path };
       }catch(e){ err(e.message||String(e)); throw e; }
     }
 
     async function buy(){
       try{
-        const {pay, amountIn, minOut, path} = await getQuote();
+        const { amountIn, minOut, path } = await getQuote();
         if(!signer) throw new Error(t("err_connect"));
         const deadline = Math.floor(Date.now()/1000)+15*60;
-
-        if(pay==="BNB"){
-          const tx = await router.swapExactETHForTokensSupportingFeeOnTransferTokens(
-            minOut, path, account, deadline, {value:amountIn}
-          );
-          ok(t("ok_buying"));
-          const rc=await tx.wait(); ok(t("ok_tx",{hash:rc.hash}));
-        }else{
-          const allowance = await usdt.allowance(account, ROUTER);
-          if(allowance < amountIn){ ok(t("ok_approve")); const a=await usdt.approve(ROUTER, amountIn); await a.wait(); }
-          const tx = await router.swapExactTokensForTokensSupportingFeeOnTransferTokens(
-            amountIn, minOut, path, account, deadline
-          );
-          ok(t("ok_buying"));
-          const rc=await tx.wait(); ok(t("ok_tx",{hash:rc.hash}));
-        }
+        const tx = await router.swapExactETHForTokensSupportingFeeOnTransferTokens(
+          minOut, path, account, deadline, { value: amountIn }
+        );
+        ok(t("ok_buying"));
+        const rc = await tx.wait();
+        ok(t("ok_tx",{hash:rc.hash}));
       }catch(e){ err(e.message||String(e)); }
     }
 
     async function addTok(){
       try{
         const eth = (provider && provider.provider) || window.ethereum || wcProvider;
-        if(!eth || !eth.request) throw new Error(t("err_connect"));
+        if(!eth) throw new Error(t("err_connect"));
         await eth.request({method:"wallet_watchAsset", params:{type:"ERC20", options:{address:TOKEN, symbol:".Onion", decimals:18}}});
       }catch(e){ err(e.message||String(e)); }
     }
@@ -331,7 +279,7 @@
     // ---- i18n ----
     const L = {
       en:{title:"Buy .Onion",
-          sub:"PCS V2 Router • BNB or USDT (multi‑hop USDT→WBNB→.Onion) • addresses in lowercase.",
+          sub:"PCS V2 Router • BNB (WBNB→.Onion) • addresses in lowercase.",
           network:"Network", wallet:"Wallet", paywith:"Pay with", amount:"Amount",
           btn_quote:"Quote", btn_buy:"Buy",
           ok_connected:"Wallet connected.",
@@ -340,10 +288,9 @@
           err_connect:"Please connect a wallet first.",
           ok_buying:"Processing purchase…",
           ok_tx:"Success! Tx: https://bscscan.com/tx/{hash}",
-          ok_approve:"Approving USDT…",
-          quote_line:"Pay: <b>{amt}</b> {sym}<br>Receive ~ <b>{out}</b> .Onion<br>MinOut ({sl}%): <b>{min}</b>"},
+          quote_line_bnb:"Pay: <b>{amt}</b> BNB<br>Receive ~ <b>{out}</b> .Onion<br>MinOut ({sl}%): <b>{min}</b>"},
       si:{title:"Kupi .Onion",
-          sub:"PCS V2 Router • BNB ali USDT (multi‑hop USDT→WBNB→.Onion) • naslovi v lowercase.",
+          sub:"PCS V2 Router • BNB (WBNB→.Onion) • naslovi v lowercase.",
           network:"Omrežje", wallet:"Denarnica", paywith:"Plačilo z", amount:"Znesek",
           btn_quote:"Kotacija", btn_buy:"Kupi",
           ok_connected:"Denarnica povezana.",
@@ -352,8 +299,7 @@
           err_connect:"Najprej poveži denarnico.",
           ok_buying:"Nakup v teku …",
           ok_tx:"Uspeh! Tx: https://bscscan.com/tx/{hash}",
-          ok_approve:"Odobritev USDT…",
-          quote_line:"Plačilo: <b>{amt}</b> {sym}<br>Prejmeš približno: <b>{out}</b> .Onion<br>MinOut ({sl}%): <b>{min}</b>"}
+          quote_line_bnb:"Plačilo: <b>{amt}</b> BNB<br>Prejmeš približno: <b>{out}</b> .Onion<br>MinOut ({sl}%): <b>{min}</b>"}
     };
     function t(key, vars){
       const lang = document.body.getAttribute("data-lang") || "en";
@@ -375,8 +321,8 @@
       $("bSI").classList.toggle("active", lang==="si");
     }
 
-    // ---- Events ----
-    window.addEventListener("DOMContentLoaded", async ()=>{
+    // Events
+    window.addEventListener("DOMContentLoaded", ()=>{
       applyLang("en");
       $("bEN").addEventListener("click", ()=>applyLang("en"));
       $("bSI").addEventListener("click", ()=>applyLang("si"));
@@ -386,11 +332,6 @@
       $("quote").addEventListener("click", getQuote);
       $("buy").addEventListener("click", buy);
       $("addTok").addEventListener("click", addTok);
-
-      // Omogoči WalletConnect gumb, ko je SDK na voljo
-      if(getWcCtor()){ $("connectWc").disabled=false; $("connectWc").title=""; }
-
-      // Samodejni reconnect, če obstaja WC seja
       tryAutoWalletConnect();
     });
   })();
