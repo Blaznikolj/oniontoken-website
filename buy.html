@@ -14,8 +14,8 @@
       --muted:#9aa4b2;
       --field:#0b1220;
 
-      /* ACCENT – ista kot na indexu */
-      --accent:#27c193;
+      /* TURKIZNA – enaka kot na index strani */
+      --accent:#00c8b9;
       --accent-contrast:#08131a;
     }
     html,body{margin:0;background:var(--bg);color:var(--text);
@@ -42,7 +42,6 @@
     .lang button.active{background:var(--accent);color:var(--accent-contrast)}
     .pill{display:inline-block;padding:6px 10px;border-radius:999px;background:#1f2937;
       color:var(--text);font-size:12px;font-weight:700}
-    /* hover/focus za accent gumbe */
     .primary:hover{filter:brightness(1.05)}
     .primary:active{transform:translateY(1px)}
   </style>
@@ -55,7 +54,7 @@
 
   <div class="wrap">
     <h1 id="tTitle">Buy .Onion</h1>
-    <p class="muted" id="tSub" style="display:none"></p> <!-- skrito podnaslovje -->
+    <p class="muted" id="tSub" style="display:none"></p><!-- podnaslov je skrit -->
 
     <div class="card">
       <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
@@ -121,7 +120,6 @@
     const $ = (id)=>document.getElementById(id);
     const ok  = (t)=>{ $("status").style.display="block"; $("status").textContent=t; $("error").style.display="none"; };
     const err = (t)=>{ $("error").style.display="block"; $("error").textContent=t; $("status").style.display="none"; };
-    const fmt = (n,d=6)=>Number(n).toLocaleString(undefined,{maximumFractionDigits:d});
 
     let provider, signer, account, router;
 
