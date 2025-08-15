@@ -16,7 +16,7 @@
     .primary{background:#27c193;color:#08131a}
     .primary:disabled{opacity:.6;cursor:not-allowed}
     .secondary{background:#1f2937;color:#e6e8ec}
-    .muted{color:#9aa4b2;font-size:13px;display:none} /* skrit podnaslov, kot si želel */
+    .muted{color:#9aa4b2;font-size:13px;display:none}
     .ok{color:#27c193;white-space:pre-line;font-size:13px;display:none}
     .err{color:#ff6b6b;white-space:pre-line;font-size:13px;display:none}
     .lang{position:fixed;right:16px;top:16px;display:flex;gap:8px;z-index:10}
@@ -24,11 +24,6 @@
     .lang button.active{background:#27c193;color:#08131a}
     .pill{display:inline-block;padding:6px 10px;border-radius:999px;background:#1f2937;color:#e6e8ec;font-size:12px;font-weight:700}
   </style>
-
-  <!-- Ethers v6 (UMD) -->
-  <script src="https://cdn.jsdelivr.net/npm/ethers@6.13.1/dist/ethers.umd.min.js"></script>
-  <!-- WalletConnect Ethereum Provider v2 (UMD) -->
-  <script src="https://unpkg.com/@walletconnect/ethereum-provider@2.11.2/dist/umd/index.min.js"></script>
 </head>
 <body data-lang="en">
   <div class="lang">
@@ -46,15 +41,15 @@
         <span id="connType" class="pill">—</span>
       </div>
       <div class="row" style="margin-top:12px">
-        <button id="connect"   class="primary">Connect wallet</button>
-        <button id="connectWc" class="secondary">WalletConnect</button>
+        <button id="connect" class="primary">Connect wallet</button>
+        <button id="connectWc" class="secondary" disabled title="Loading WalletConnect…">WalletConnect</button>
       </div>
       <div class="row" style="margin-top:8px">
-        <button id="addTok"    class="secondary">Add .Onion to wallet</button>
+        <button id="addTok" class="secondary">Add .Onion to wallet</button>
         <button id="disconnect" class="secondary" disabled>Disconnect</button>
       </div>
       <div id="status" class="ok"></div>
-      <div id="error"  class="err"></div>
+      <div id="error" class="err"></div>
     </div>
 
     <div class="card">
@@ -78,13 +73,18 @@
           <label>&nbsp;</label>
           <div class="row">
             <button id="quote" class="secondary">Quote</button>
-            <button id="buy"   class="primary">Buy</button>
+            <button id="buy" class="primary">Buy</button>
           </div>
         </div>
       </div>
       <div id="q" class="muted" style="margin-top:10px">—</div>
     </div>
   </div>
+
+  <!-- Ethers v6 (UMD) -->
+  <script src="https://cdn.jsdelivr.net/npm/ethers@6.13.1/dist/ethers.umd.min.js"></script>
+  <!-- WalletConnect / Reown Ethereum Provider v2 (UMD) -->
+  <script src="https://unpkg.com/@walletconnect/ethereum-provider@2.11.2/dist/umd/index.min.js"></script>
 
   <script>
   (function(){
@@ -93,11 +93,12 @@
     const WBNB   = "0xbb4cdb9cbd36b01bd1cbaebf2de08d9173bc095c";
     const USDT   = "0x55d398326f99059ff775485246999027b3197955";
     const ROUTER = "0x10ed43c718714eb63d5aa57b78b54704e256024e";
-    const CHAIN_HEX = "0x38";    // BSC chainId in hex
-    const CHAIN_ID  = 56;        // BSC decimal
+    const CHAIN_HEX = "0x38";  // BSC
+    const CHAIN_ID  = 56;
     const RPC_BSC   = "https://bsc-dataseed.binance.org";
-    const WC_PROJECT_ID = "5fd10d829d57b05296f4846c5ce385b8"; // <- tvoj WalletConnect Project ID
+    const WC_PROJECT_ID = "5fd10d829d57b05296f4846c5ce385b8";
 
+    // ABIs
     const routerAbi = [
       "function getAmountsOut(uint256 amountIn, address[] calldata path) external view returns (uint256[] memory)",
       "function swapExactETHForTokensSupportingFeeOnTransferTokens(uint amountOutMin, address[] calldata path, address to, uint deadline) external payable",
@@ -109,18 +110,19 @@
       "function approve(address spender, uint256 amount) external returns (bool)"
     ];
 
-    // ==== helpers ====
+    // Helpers
     const $  = (id)=>document.getElementById(id);
     const ok = (t)=>{ $("status").style.display="block"; $("status").textContent=t; $("error").style.display="none"; };
     const err= (t)=>{ $("error").style.display="block"; $("error").textContent=t; $("status").style.display="none"; };
-    const toWei = (amt, dec)=> {
+    const toWei = (amt, dec) => {
       const n = Number(amt);
-      if(!isFinite(n) || n<=0) return 0n;
-      const f = 10 ** Math.min(dec,18);
+      if (!isFinite(n) || n <= 0) return 0n;
+      const f = 10 ** Math.min(dec, 18);
       return BigInt(Math.round(n * f));
     };
 
     let provider, signer, account, router, usdt, wcProvider;
+    let connecting = false;
 
     function setConnUI(type){
       $("connType").textContent = type || "—";
@@ -132,8 +134,8 @@
     function clearState(){
       provider = signer = account = router = usdt = undefined;
       setConnUI(null);
-      $("q").style.display="none";
-      $("q").textContent="—";
+      $("q").style.display = "none";
+      $("q").textContent = "—";
       $("status").style.display="none";
       $("error").style.display="none";
     }
@@ -154,30 +156,39 @@
       }
     }
 
-    // Injected wallets (MetaMask, Trust v razširitvi, OKX…)
+    // ---- Injected (MetaMask…) ----
     async function connectInjected(){
+      if(connecting) return;
+      connecting = true; $("connect").disabled = true;
       try{
         const eth = window.ethereum;
-        if(!eth) throw new Error(t("err_nowallet"));
+        if(!eth) throw new Error("Wallet not detected.");
         await ensureChain(eth);
-        provider = new ethers.BrowserProvider(eth);
-        await provider.send("eth_requestAccounts", []);
+        const bp = new ethers.BrowserProvider(eth);
+        await bp.send("eth_requestAccounts", []);
+        provider = bp;
         signer   = await provider.getSigner();
-        await afterConnect("Injected", eth);
+        afterConnect("Injected", eth);
       }catch(e){ err(e.message||String(e)); }
+      finally{ connecting = false; $("connect").disabled = false; }
     }
 
-    // WalletConnect (QR / mobile)
-    function wcClass(){
-      // UMD lahko izpostavi različna imena – pokrijmo oba
-      return (window.WalletConnectEthereumProvider && (window.WalletConnectEthereumProvider.default || window.WalletConnectEthereumProvider))
-          || (window.EthereumProvider && (window.EthereumProvider.default || window.EthereumProvider));
+    // ---- WalletConnect (QR) ----
+    function getWcCtor(){
+      // UMD lahko izpostavi različna imena; poiščemo katerokoli
+      return (window.WalletConnectEthereumProvider && window.WalletConnectEthereumProvider.default)
+          || window.WalletConnectEthereumProvider
+          || (window.EthereumProvider && window.EthereumProvider.default)
+          || window.EthereumProvider;
     }
+
     async function connectWalletConnect(){
       try{
-        const WCP = wcClass();
-        if(!WCP) throw new Error("WalletConnect SDK not loaded.");
-        wcProvider = await WCP.init({
+        const WC = getWcCtor();
+        if(!WC) throw new Error("WalletConnect SDK not loaded.");
+        if(!WC_PROJECT_ID) throw new Error("Missing WalletConnect Project ID.");
+        // v2 API: .init(...)
+        wcProvider = await WC.init({
           projectId: WC_PROJECT_ID,
           chains: [CHAIN_ID],
           methods: ["eth_sendTransaction","personal_sign","eth_signTypedData","eth_accounts","eth_requestAccounts"],
@@ -190,15 +201,16 @@
         provider = new ethers.BrowserProvider(wcProvider);
         signer   = await provider.getSigner();
         bindWcEvents();
-        await afterConnect("WalletConnect", wcProvider);
+        afterConnect("WalletConnect", wcProvider);
       }catch(e){ err(e.message||String(e)); }
     }
-    // Samodejna ponovna povezava WC, če seja že obstaja
+
+    // Auto-reconnect brez QR, če obstaja seja
     async function tryAutoWalletConnect(){
       try{
-        const WCP = wcClass();
-        if(!WCP) return;
-        const p = await WCP.init({
+        const WC = getWcCtor();
+        if(!WC || !WC_PROJECT_ID) return;
+        const p = await WC.init({
           projectId: WC_PROJECT_ID,
           chains: [CHAIN_ID],
           methods: ["eth_sendTransaction","personal_sign","eth_signTypedData","eth_accounts","eth_requestAccounts"],
@@ -206,15 +218,16 @@
           showQrModal: false,
           rpcMap: { [CHAIN_ID]: RPC_BSC }
         });
-        await p.enable();        // uspe samo, če je seja že shranjena
+        await p.enable();          // uspe le, če obstaja prejšnja seja
         wcProvider = p;
         try{ await ensureChain(wcProvider); }catch(_){}
         provider = new ethers.BrowserProvider(wcProvider);
         signer   = await provider.getSigner();
         bindWcEvents();
-        await afterConnect("WalletConnect", wcProvider);
-      }catch(_){ /* ni obstoječe seje – ignoriraj */ }
+        afterConnect("WalletConnect", wcProvider);
+      }catch(_ignored){}
     }
+
     function bindWcEvents(){
       wcProvider?.on?.("disconnect", clearState);
       wcProvider?.on?.("accountsChanged", async ()=>afterConnect("WalletConnect", wcProvider));
@@ -222,19 +235,21 @@
     }
 
     async function afterConnect(kind, eth){
-      account  = await (await provider.getSigner()).getAddress();
-      router   = new ethers.Contract(ROUTER, routerAbi, await provider.getSigner());
-      usdt     = new ethers.Contract(USDT, erc20Abi, await provider.getSigner());
-      $("acct").textContent = account.slice(0,6)+"…"+account.slice(-4);
-      setConnUI(kind);
-      ok(t("ok_connected"));
-      // posodabljaj tudi pri injected spremembah
-      eth?.on?.("accountsChanged", async ()=>{ if(kind==="Injected") try{ await connectInjected(); }catch{} });
-      eth?.on?.("chainChanged",   async ()=>{ if(kind==="Injected") try{ await connectInjected(); }catch{} });
+      try{
+        account  = await (await provider.getSigner()).getAddress();
+        router   = new ethers.Contract(ROUTER, routerAbi, await provider.getSigner());
+        usdt     = new ethers.Contract(USDT, erc20Abi, await provider.getSigner());
+        $("acct").textContent=account.slice(0,6)+"…"+account.slice(-4);
+        setConnUI(kind);
+        ok(t("ok_connected"));
+        // poslušaj spremembe pri injected
+        eth?.on?.("accountsChanged", async ()=>{ if(kind==="Injected") try{ await connectInjected(); }catch{} });
+        eth?.on?.("chainChanged",   async ()=>{ if(kind==="Injected") try{ await connectInjected(); }catch{} });
+      }catch(e){ err(e.message||String(e)); }
     }
 
     async function disconnect(){
-      try{ if(wcProvider?.disconnect) await wcProvider.disconnect(); }
+      try{ if(wcProvider){ await wcProvider.disconnect?.(); } }
       finally{ clearState(); }
     }
 
@@ -243,7 +258,7 @@
         const eth = (provider && provider.provider) || window.ethereum || wcProvider;
         if(!eth) throw new Error(t("err_connect"));
         const s = await (new ethers.BrowserProvider(eth)).getSigner();
-        router  = new ethers.Contract(ROUTER, routerAbi, s);
+        router = new ethers.Contract(ROUTER, routerAbi, s);
       }
       return router;
     }
@@ -255,15 +270,16 @@
         const amt = parseFloat($("amt").value);
         if(!amt || amt<=0) throw new Error(t("err_amount"));
 
-        let path, amountIn, sym, d = 18;
+        let path, amountIn, sym;
         if(pay==="BNB"){
           path=[WBNB, TOKEN];
           amountIn=ethers.parseEther(String(amt));
           sym="BNB";
         }else{
-          try{ d = await usdt.decimals(); }catch{}
+          // USDT decimals
+          const d = (typeof usdt?.decimals === "function") ? await usdt.decimals() : 18;
           path=[USDT, WBNB, TOKEN];
-          amountIn=toWei(amt, d);            // BigInt, brez mešanja tipov
+          amountIn=toWei(amt, d);
           sym="USDT";
         }
 
@@ -272,11 +288,10 @@
         catch{ throw new Error(t("err_quote")); }
 
         const out = amounts[amounts.length-1];
-        const sl  = Math.max(0.1, parseFloat($("slip").value||"1"));
+        const sl = Math.max(0.1, parseFloat($("slip").value||"1"));
         const minOut = out - (out * BigInt(Math.floor(sl*1000)) / 100000n);
-
         $("q").style.display="block";
-        $("q").innerHTML = t("quote_line",{amt,sym,out:Number(out)/1e18,min:Number(minOut)/1e18,sl});
+        $("q").innerHTML = t("quote_line", {amt, sym, out:Number(out)/1e18, min:Number(minOut)/1e18, sl});
         return {pay, amountIn, minOut, path};
       }catch(e){ err(e.message||String(e)); throw e; }
     }
@@ -292,21 +307,15 @@
             minOut, path, account, deadline, {value:amountIn}
           );
           ok(t("ok_buying"));
-          const rc = await tx.wait();
-          ok(t("ok_tx",{hash:rc.hash}));
+          const rc=await tx.wait(); ok(t("ok_tx",{hash:rc.hash}));
         }else{
           const allowance = await usdt.allowance(account, ROUTER);
-          if(allowance < amountIn){
-            ok(t("ok_approve"));
-            const a = await usdt.approve(ROUTER, amountIn);
-            await a.wait();
-          }
+          if(allowance < amountIn){ ok(t("ok_approve")); const a=await usdt.approve(ROUTER, amountIn); await a.wait(); }
           const tx = await router.swapExactTokensForTokensSupportingFeeOnTransferTokens(
             amountIn, minOut, path, account, deadline
           );
           ok(t("ok_buying"));
-          const rc = await tx.wait();
-          ok(t("ok_tx",{hash:rc.hash}));
+          const rc=await tx.wait(); ok(t("ok_tx",{hash:rc.hash}));
         }
       }catch(e){ err(e.message||String(e)); }
     }
@@ -314,7 +323,7 @@
     async function addTok(){
       try{
         const eth = (provider && provider.provider) || window.ethereum || wcProvider;
-        if(!eth) throw new Error(t("err_connect"));
+        if(!eth || !eth.request) throw new Error(t("err_connect"));
         await eth.request({method:"wallet_watchAsset", params:{type:"ERC20", options:{address:TOKEN, symbol:".Onion", decimals:18}}});
       }catch(e){ err(e.message||String(e)); }
     }
@@ -326,7 +335,6 @@
           network:"Network", wallet:"Wallet", paywith:"Pay with", amount:"Amount",
           btn_quote:"Quote", btn_buy:"Buy",
           ok_connected:"Wallet connected.",
-          err_nowallet:"Wallet not detected.",
           err_amount:"Enter an amount.",
           err_quote:"Quote failed (no path on PCS V2 or empty reserves).",
           err_connect:"Please connect a wallet first.",
@@ -339,7 +347,6 @@
           network:"Omrežje", wallet:"Denarnica", paywith:"Plačilo z", amount:"Znesek",
           btn_quote:"Kotacija", btn_buy:"Kupi",
           ok_connected:"Denarnica povezana.",
-          err_nowallet:"Denarnica ni zaznana.",
           err_amount:"Vnesi znesek.",
           err_quote:"Kotacija ni uspela (ni poti na PCS V2 ali prazne rezerve).",
           err_connect:"Najprej poveži denarnico.",
@@ -356,8 +363,8 @@
     }
     function applyLang(lang){
       document.body.setAttribute("data-lang", lang);
-      $("tTitle").textContent   = t("title");
-      $("tSub").textContent     = t("sub");
+      $("tTitle").textContent = t("title");
+      $("tSub").textContent   = t("sub");
       $("tNetwork").textContent = t("network");
       $("tWallet").textContent  = t("wallet");
       $("tPayWith").textContent = t("paywith");
@@ -368,7 +375,7 @@
       $("bSI").classList.toggle("active", lang==="si");
     }
 
-    // ---- events ----
+    // ---- Events ----
     window.addEventListener("DOMContentLoaded", async ()=>{
       applyLang("en");
       $("bEN").addEventListener("click", ()=>applyLang("en"));
@@ -380,7 +387,10 @@
       $("buy").addEventListener("click", buy);
       $("addTok").addEventListener("click", addTok);
 
-      // auto-reconnect WC, če je bila seja prej
+      // Omogoči WalletConnect gumb, ko je SDK na voljo
+      if(getWcCtor()){ $("connectWc").disabled=false; $("connectWc").title=""; }
+
+      // Samodejni reconnect, če obstaja WC seja
       tryAutoWalletConnect();
     });
   })();
