@@ -3,7 +3,7 @@ body {
     margin: 0;
     padding: 0;
     font-family: 'Arial', sans-serif;
-    background: #0A0F1C; /* odsevno temno modro ozadje */
+    background: #05080F; /* zelo temno modro ozadje */
     color: #fff;
     line-height: 1.6;
 }
@@ -16,7 +16,7 @@ a {
 
 /* HEADER */
 .header {
-    background: rgba(10, 15, 28, 0.95); /* malo prosojno, da se ujema z body */
+    background: rgba(5, 8, 15, 0.95); /* enaka barva kot body, z rahlo prosojnostjo */
     display: flex;
     justify-content: space-between;
     align-items: center;
@@ -52,7 +52,7 @@ a {
 .hero {
     text-align: center;
     padding: 100px 20px;
-    background: #0A0F1C; /* enako kot body */
+    background: #05080F; /* enako kot body */
 }
 .hero h1 {
     color: #00ffff;
@@ -134,7 +134,7 @@ section {
 
 /* FOOTER */
 .footer {
-    background: #0A0F1C; /* enako kot body */
+    background: #05080F; /* enako kot body */
     text-align: center;
     padding: 20px;
     color: #999;
